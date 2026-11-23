@@ -134,7 +134,7 @@ export const PrintSettingsAccordion: React.FC<PrintSettingsAccordionProps> = ({
   };
 
   return (
-    <aside className="w-[320px] h-full bg-white border-l border-studio-border flex flex-col justify-between shrink-0 select-none z-10">
+    <aside className="w-full md:w-[320px] h-full bg-white border-l border-studio-border flex flex-col justify-between shrink-0 select-none z-10">
       
       {/* Top Header matching Screenshot */}
       <div>

@@ -65,9 +65,9 @@ export const PhotoFilterModal: React.FC<PhotoFilterModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-lg overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-100 bg-stone-50/50">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none">
+      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-lg max-h-[92dvh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-100 bg-stone-50/50 shrink-0">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-amber-500" />
             <h3 className="font-bold text-stone-900 text-sm">Chỉnh màu & Bộ lọc ảnh</h3>
@@ -80,7 +80,7 @@ export const PhotoFilterModal: React.FC<PhotoFilterModalProps> = ({
           </button>
         </div>
 
-        <div className="p-5 flex flex-col md:flex-row gap-5 items-center">
+        <div className="p-5 flex-1 overflow-y-auto flex flex-col md:flex-row gap-5 items-center">
           <div className="w-48 h-56 bg-stone-900 rounded-xl overflow-hidden flex items-center justify-center shadow-md shrink-0">
             <img
               src={photo.url}
@@ -177,7 +177,7 @@ export const PhotoFilterModal: React.FC<PhotoFilterModalProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-5 py-3.5 border-t border-stone-100 bg-stone-50/50">
+        <div className="flex items-center justify-between px-5 py-3.5 pb-[max(env(safe-area-inset-bottom),14px)] border-t border-stone-100 bg-stone-50/50 shrink-0">
           <button
             type="button"
             onClick={() => handleApplyPreset("none")}

@@ -8,7 +8,8 @@ import {
   Sparkles, 
   ArrowLeft, 
   Image as ImageIcon, 
-  FolderDown
+  FolderDown,
+  Sliders
 } from 'lucide-react';
 import { ActiveTab } from './Sidebar';
 
@@ -21,6 +22,7 @@ interface CaosDynamicCapsuleProps {
   inEditorMode?: boolean;
   onBackToOrders?: () => void;
   onOpenMobilePhotos?: () => void;
+  onOpenMobileSettings?: () => void;
   onQuickAutoLayout?: () => void;
   onOpenExportModal?: () => void;
   photosCount?: number;
@@ -34,6 +36,7 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
   inEditorMode = false,
   onBackToOrders,
   onOpenMobilePhotos,
+  onOpenMobileSettings,
   onQuickAutoLayout,
   onOpenExportModal,
   photosCount = 0
@@ -43,9 +46,9 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
   // ==========================================
   if (inEditorMode) {
     return (
-      <div className="fixed bottom-[max(env(safe-area-inset-bottom),14px)] left-1/2 -translate-x-1/2 z-50 md:hidden pointer-events-auto max-w-[92vw]">
+      <div className="fixed bottom-[max(env(safe-area-inset-bottom),14px)] left-1/2 -translate-x-1/2 z-50 md:hidden pointer-events-auto max-w-[96vw]">
         <div 
-          className="flex items-center gap-1.5 p-1.5 rounded-full border border-stone-700/80 shadow-[0_16px_50px_rgba(0,0,0,0.65)] text-white backdrop-blur-2xl"
+          className="flex items-center gap-1 p-1.5 rounded-full border border-stone-700/80 shadow-[0_16px_50px_rgba(0,0,0,0.65)] text-white backdrop-blur-2xl"
           style={{ backgroundColor: 'rgba(20, 18, 16, 0.95)' }}
         >
           {/* Back to Orders */}
@@ -73,6 +76,18 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
               </span>
             )}
           </button>
+
+          {/* Cài đặt in Sheet Pill */}
+          {onOpenMobileSettings && (
+            <button
+              onClick={onOpenMobileSettings}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition border border-white/10 text-xs font-semibold shrink-0"
+              title="Thiết lập khổ giấy & viền"
+            >
+              <Sliders className="w-3.5 h-3.5 text-amber-400" />
+              <span>Cài đặt</span>
+            </button>
+          )}
 
           {/* Dàn tự động */}
           <button

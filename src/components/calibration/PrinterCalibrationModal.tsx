@@ -105,18 +105,18 @@ export const PrinterCalibrationModal: React.FC<PrinterCalibrationModalProps> = (
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 select-none">
-      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none">
+      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-4xl max-h-[92dvh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         
         {/* Header matching Screenshot 10 */}
-        <div className="px-6 py-4 border-b border-stone-100 flex items-center justify-between">
+        <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-stone-100 flex items-center justify-between shrink-0">
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-0.5">
               <span className="text-stone-400 text-xs">Cài đặt /</span>
               <span className="text-stone-900 font-semibold text-xs">Máy in</span>
             </div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-stone-900">Máy in</h2>
+              <h2 className="text-base sm:text-lg font-bold text-stone-900">Máy in</h2>
               <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Cài đặt</span>
             </div>
             <p className="text-xs text-stone-400 mt-0.5">
@@ -129,14 +129,14 @@ export const PrinterCalibrationModal: React.FC<PrinterCalibrationModalProps> = (
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-6 text-xs">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-5 sm:space-y-6 text-xs flex-1">
           
           {/* Section 1: Thông tin máy in */}
-          <div className="bg-stone-50/70 p-5 rounded-2xl border border-stone-200/80 space-y-3">
+          <div className="bg-stone-50/70 p-4 sm:p-5 rounded-2xl border border-stone-200/80 space-y-3">
             <h3 className="font-bold text-stone-900 text-sm">Thông tin máy in</h3>
             <p className="text-stone-400 text-[11px]">Đổi máy in thì cần căn lề lại một lần.</p>
 
-            <div className="grid grid-cols-2 gap-4 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1">
               <div>
                 <label className="font-semibold text-stone-700 block mb-1">Tên máy in</label>
                 <input
@@ -162,7 +162,7 @@ export const PrinterCalibrationModal: React.FC<PrinterCalibrationModalProps> = (
           </div>
 
           {/* Section 2: Căn lề một lần */}
-          <div className="bg-stone-50/70 p-5 rounded-2xl border border-stone-200/80 space-y-4">
+          <div className="bg-stone-50/70 p-4 sm:p-5 rounded-2xl border border-stone-200/80 space-y-4">
             <h3 className="font-bold text-stone-900 text-sm">Căn lề một lần</h3>
             <ol className="list-decimal list-inside space-y-1 text-stone-600 text-xs">
               <li>In tờ căn lề. Khung đen trên tờ cách mép giấy đúng <strong>10 mm</strong>.</li>
@@ -171,7 +171,7 @@ export const PrinterCalibrationModal: React.FC<PrinterCalibrationModalProps> = (
             </ol>
 
             {/* Print test sheet action buttons */}
-            <div className="flex items-center gap-3 pt-1">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1">
               <select
                 value={testPaperSize}
                 onChange={(e) => setTestPaperSize(e.target.value)}
@@ -185,7 +185,7 @@ export const PrinterCalibrationModal: React.FC<PrinterCalibrationModalProps> = (
               <button
                 type="button"
                 onClick={handleDownloadCalibrationPdf}
-                className="flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white font-bold rounded-lg shadow-xs transition"
+                className="flex items-center justify-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white font-bold rounded-lg shadow-xs transition"
               >
                 <Printer className="w-3.5 h-3.5" />
                 <span>In tờ căn lề</span>
@@ -194,7 +194,7 @@ export const PrinterCalibrationModal: React.FC<PrinterCalibrationModalProps> = (
               <button
                 type="button"
                 onClick={handleDownloadCalibrationPdf}
-                className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-stone-100 text-stone-700 font-semibold rounded-lg border border-stone-200 transition"
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-white hover:bg-stone-100 text-stone-700 font-semibold rounded-lg border border-stone-200 transition"
               >
                 <Download className="w-3.5 h-3.5 text-stone-500" />
                 <span>Lưu file tờ căn lề</span>
@@ -202,7 +202,7 @@ export const PrinterCalibrationModal: React.FC<PrinterCalibrationModalProps> = (
             </div>
 
             {/* Measurement inputs */}
-            <div className="grid grid-cols-2 gap-4 pt-3 border-t border-stone-200/80">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-3 border-t border-stone-200/80">
               <div>
                 <label className="font-semibold text-stone-700 block mb-1">Khoảng cách đo ở cạnh trái (mm)</label>
                 <input
@@ -260,7 +260,7 @@ export const PrinterCalibrationModal: React.FC<PrinterCalibrationModalProps> = (
         </div>
 
         {/* Footer actions */}
-        <div className="px-6 py-4 bg-stone-50 border-t border-stone-100 flex items-center justify-end gap-3">
+        <div className="px-5 sm:px-6 py-3.5 pb-[max(env(safe-area-inset-bottom),14px)] bg-stone-50 border-t border-stone-100 flex items-center justify-end gap-3 shrink-0">
           <button
             type="button"
             onClick={onClose}

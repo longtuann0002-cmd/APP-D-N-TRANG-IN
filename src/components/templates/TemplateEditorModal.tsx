@@ -212,9 +212,9 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl shadow-2xl border border-stone-200 w-full max-w-4xl overflow-hidden flex flex-col max-h-[94vh]">
+      <div className="bg-white rounded-3xl shadow-2xl border border-stone-200 w-full max-w-4xl overflow-hidden flex flex-col max-h-[94dvh]">
         {/* Header */}
-        <div className="px-6 py-3.5 border-b border-stone-100 flex items-center justify-between bg-stone-50/70">
+        <div className="px-5 sm:px-6 py-3.5 border-b border-stone-100 flex items-center justify-between bg-stone-50/70 shrink-0">
           <div className="flex items-center gap-2.5">
             <span className="w-7 h-7 rounded-xl bg-stone-900 text-white flex items-center justify-center text-xs font-bold shadow-xs">
               ✦
@@ -235,7 +235,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
         </div>
 
         {/* Body 2 columns */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden p-5 sm:p-6 gap-6">
+        <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden p-4 sm:p-6 gap-5 sm:gap-6">
           
           {/* Left: Live Visual Preview */}
           <div className="w-full md:w-80 flex flex-col items-center justify-between bg-stone-100/70 border border-stone-200 rounded-2xl p-4 shrink-0 overflow-y-auto">
@@ -365,7 +365,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                 <label className="text-xs font-bold text-stone-700">Khổ cắt thành phẩm ngoài</label>
                 <span className="text-[10px] text-stone-400">Kích thước giấy thành phẩm dùng dao xén</span>
               </div>
-              <div className="grid grid-cols-4 gap-1.5 mb-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-2">
                 {[
                   { label: 'Polaroid mini', w: 54, h: 86, style: 'polaroid' as BorderStyle, sub: 'single' as SubSlotLayout },
                   { label: 'Ảnh 6×9', w: 60, h: 90, style: 'thin' as BorderStyle, sub: 'single' as SubSlotLayout },
@@ -951,7 +951,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3.5 border-t border-stone-100 bg-stone-50/50 flex items-center justify-between">
+        <div className="px-5 sm:px-6 py-3.5 pb-[max(env(safe-area-inset-bottom),14px)] border-t border-stone-100 bg-stone-50/50 flex items-center justify-between shrink-0">
           <button
             type="button"
             onClick={onClose}

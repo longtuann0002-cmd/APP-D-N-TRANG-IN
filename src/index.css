@@ -3,14 +3,33 @@
 @tailwind utilities;
 
 @layer base {
-  body {
+  :root {
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+  }
+
+  html, body {
     @apply bg-studio-bg text-stone-800 antialiased font-sans select-none;
     overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   input, textarea, select {
     @apply select-text;
   }
+}
+
+/* Hide scrollbar cross-browser */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Custom subtle scrollbar */

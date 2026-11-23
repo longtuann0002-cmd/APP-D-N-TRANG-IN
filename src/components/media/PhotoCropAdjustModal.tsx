@@ -53,6 +53,32 @@ export const PhotoCropAdjustModal: React.FC<PhotoCropAdjustModalProps> = ({
     dragStartRef.current = null;
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!e.touches[0]) return;
+    setIsDragging(true);
+    dragStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      startOffX: offsetX,
+      startOffY: offsetY
+    };
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !dragStartRef.current || !e.touches[0]) return;
+    const dx = e.touches[0].clientX - dragStartRef.current.x;
+    const dy = e.touches[0].clientY - dragStartRef.current.y;
+    const newOffX = Math.max(-50, Math.min(50, dragStartRef.current.startOffX + (dx / 2.5)));
+    const newOffY = Math.max(-50, Math.min(50, dragStartRef.current.startOffY + (dy / 2.5)));
+    setOffsetX(Math.round(newOffX));
+    setOffsetY(Math.round(newOffY));
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    dragStartRef.current = null;
+  };
+
   const handleAlign = (dir: "center" | "top" | "bottom" | "left" | "right") => {
     if (dir === "center") {
       setOffsetX(0);
@@ -83,12 +109,13 @@ export const PhotoCropAdjustModal: React.FC<PhotoCropAdjustModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none">
       <div 
-        className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-xl overflow-hidden flex flex-col"
+        className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-xl max-h-[92dvh] overflow-hidden flex flex-col"
         onMouseUp={handleMouseUp}
+        onTouchEnd={handleTouchEnd}
       >
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-100 bg-stone-50/50">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-100 bg-stone-50/50 shrink-0">
           <div>
             <h3 className="font-bold text-stone-900 text-sm">Căn chỉnh ảnh trong khung</h3>
             <p className="text-[11px] text-stone-500">{photo.originalName} • Kéo rê ảnh để đổi vị trí</p>
@@ -101,16 +128,19 @@ export const PhotoCropAdjustModal: React.FC<PhotoCropAdjustModalProps> = ({
           </button>
         </div>
 
-        <div className="p-5 flex flex-col md:flex-row gap-6 items-center">
+        <div className="p-5 flex-1 overflow-y-auto flex flex-col md:flex-row gap-6 items-center">
           <div className="flex flex-col items-center">
             <div 
-              className="relative bg-stone-900 rounded-xl overflow-hidden shadow-inner flex items-center justify-center select-none cursor-grab active:cursor-grabbing border-2 border-dashed border-stone-300"
+              className="relative bg-stone-900 rounded-xl overflow-hidden shadow-inner flex items-center justify-center select-none cursor-grab active:cursor-grabbing border-2 border-dashed border-stone-300 touch-none"
               style={{
                 width: 220,
                 height: 220 / slotAspect
               }}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             >
               <img
                 src={photo.url}
@@ -254,7 +284,7 @@ export const PhotoCropAdjustModal: React.FC<PhotoCropAdjustModalProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-5 py-3.5 border-t border-stone-100 bg-stone-50/50">
+        <div className="flex items-center justify-between px-5 py-3.5 pb-[max(env(safe-area-inset-bottom),14px)] border-t border-stone-100 bg-stone-50/50 shrink-0">
           <button
             type="button"
             onClick={() => {

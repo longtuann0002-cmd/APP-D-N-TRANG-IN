@@ -168,13 +168,13 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
   };
 
   return (
-    <header className="h-12 bg-white border-b border-studio-border px-3 flex items-center justify-between shrink-0 select-none z-20">
+    <header className="h-12 md:h-12 bg-white border-b border-studio-border px-2 md:px-3 flex items-center justify-between shrink-0 select-none z-20 pt-[max(env(safe-area-inset-top),4px)] md:pt-0">
       
       {/* Left: Back Arrow + Editable Order Name + Status Badge */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
         <button
           onClick={onBackToOrders}
-          className="p-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition"
+          className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition active:scale-90"
           title="Quay lại danh sách đơn"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -188,7 +188,7 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
             onChange={(e) => setTitleInput(e.target.value)}
             onBlur={handleTitleSubmit}
             onKeyDown={(e) => e.key === 'Enter' && handleTitleSubmit()}
-            className="text-xs font-bold text-stone-900 bg-stone-50 border border-stone-300 rounded px-1.5 py-0.5 focus:outline-none"
+            className="text-xs font-bold text-stone-900 bg-stone-50 border border-stone-300 rounded px-1.5 py-0.5 focus:outline-none max-w-[110px] sm:max-w-[160px]"
           />
         ) : (
           <div 
@@ -196,10 +196,10 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
               setTitleInput(orderName);
               setIsEditingTitle(true);
             }}
-            className="flex items-center gap-1.5 cursor-pointer hover:bg-stone-50 px-1.5 py-0.5 rounded transition group"
+            className="flex items-center gap-1 cursor-pointer hover:bg-stone-50 px-1.5 py-0.5 rounded transition group max-w-[110px] sm:max-w-[160px] md:max-w-none"
           >
-            <span className="text-xs font-bold text-stone-900">{orderName}</span>
-            <Edit3 className="w-3 h-3 text-stone-400 group-hover:text-stone-700" />
+            <span className="text-xs font-bold text-stone-900 truncate">{orderName}</span>
+            <Edit3 className="w-3 h-3 text-stone-400 group-hover:text-stone-700 shrink-0" />
           </div>
         )}
 
@@ -208,7 +208,7 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
           <select
             value={orderStatus}
             onChange={(e) => onChangeStatus(e.target.value as OrderStatus)}
-            className={`text-[10px] font-bold rounded-full px-2 py-0.5 border cursor-pointer focus:outline-none ${getStatusColor(orderStatus)}`}
+            className={`text-[10px] font-bold rounded-full px-1.5 py-0.5 border cursor-pointer focus:outline-none ${getStatusColor(orderStatus)}`}
           >
             <option value="new">Mới</option>
             <option value="in_progress">Đang làm</option>
@@ -219,33 +219,33 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
       </div>
 
       {/* Center: Page Nav + Zoom + View Controls */}
-      <div className="flex items-center gap-2 bg-stone-50/80 border border-stone-200/80 rounded-xl px-2 py-1">
+      <div className="flex items-center gap-1 md:gap-2 bg-stone-50/80 border border-stone-200/80 rounded-xl px-1.5 md:px-2 py-0.5 md:py-1">
         
         {/* Page navigation: < Tờ X/Y > */}
-        <div className="flex items-center gap-1 pr-2 border-r border-stone-200">
+        <div className="flex items-center gap-0.5 md:gap-1 md:pr-2 md:border-r border-stone-200">
           <button
             disabled={currentPageIndex === 0}
             onClick={onPrevPage}
-            className="p-1 text-stone-500 hover:text-stone-900 disabled:opacity-30 rounded hover:bg-stone-200/50 transition"
+            className="p-1 text-stone-500 hover:text-stone-900 disabled:opacity-30 rounded hover:bg-stone-200/50 transition active:scale-90"
             title="Tờ trước"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
           <span className="text-[11px] font-semibold text-stone-700 px-0.5 select-none whitespace-nowrap">
-            Tờ {currentPageIndex + 1}/{totalPages}
+            {currentPageIndex + 1}/{totalPages}
           </span>
           <button
             disabled={currentPageIndex >= totalPages - 1}
             onClick={onNextPage}
-            className="p-1 text-stone-500 hover:text-stone-900 disabled:opacity-30 rounded hover:bg-stone-200/50 transition"
+            className="p-1 text-stone-500 hover:text-stone-900 disabled:opacity-30 rounded hover:bg-stone-200/50 transition active:scale-90"
             title="Tờ tiếp"
           >
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        {/* Zoom controls pill */}
-        <div className="flex items-center gap-1 pr-2 border-r border-stone-200">
+        {/* Zoom controls pill (Desktop only) */}
+        <div className="hidden md:flex items-center gap-1 pr-2 border-r border-stone-200">
           <button
             onClick={onZoomOut}
             className="p-1 text-stone-500 hover:text-stone-900 rounded hover:bg-stone-200/50 transition"
@@ -294,7 +294,7 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
           </button>
         </div>
 
-        {/* Photo manipulation tools */}
+        {/* Photo manipulation tools (Desktop only) */}
         <div className="hidden sm:flex items-center gap-0.5">
           <button
             onClick={onRotateSelectedPhoto}
@@ -337,10 +337,10 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
       </div>
 
       {/* Right: Gắn khách + Price + Undo/Redo + Fullscreen */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
         
-        {/* Customer dropdown button */}
-        <div className="relative">
+        {/* Customer dropdown button (Desktop/tablet only) */}
+        <div className="relative hidden sm:block">
           <button
             onClick={() => setIsCustomerDropdownOpen(!isCustomerDropdownOpen)}
             className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 hover:bg-stone-100 border border-stone-200 rounded-lg text-xs text-stone-700 transition"
@@ -410,16 +410,16 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
           )}
         </div>
 
-        {/* Pricing status badge */}
+        {/* Pricing status badge (Desktop/Tablet) */}
         {totalPrice && totalPrice > 0 ? (
           <span 
-            className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-200 shadow-2xs"
+            className="hidden sm:inline-flex text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-200 shadow-2xs"
             title="Giá ước tính theo số ảnh và cấu hình bảng giá"
           >
             {totalPrice.toLocaleString('vi-VN')} đ
           </span>
         ) : (
-          <span className="text-[10px] font-bold bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full border border-stone-200">
+          <span className="hidden sm:inline-flex text-[10px] font-bold bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full border border-stone-200">
             Chưa báo giá
           </span>
         )}

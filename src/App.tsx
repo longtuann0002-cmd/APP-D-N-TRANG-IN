@@ -128,8 +128,9 @@ export function App() {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [cropModalPhoto, setCropModalPhoto] = useState<PhotoItem | null>(null);
   const [filterModalPhoto, setFilterModalPhoto] = useState<PhotoItem | null>(null);
-  // Mobile: Kho ảnh bottom sheet open state
+  // Mobile: Kho ảnh & Cài đặt bottom sheets
   const [isMobilePhotosOpen, setIsMobilePhotosOpen] = useState(false);
+  const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false);
 
   // Editor specific state
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
@@ -960,19 +961,17 @@ export function App() {
 
         {/* Tab 1: Orders Dashboard */}
         {activeTab === 'orders' && (
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto pb-[80px] md:pb-0">
-              <OrdersDashboard
-                projects={projects}
-                statusFilter={statusFilter}
-                searchQuery={searchQuery}
-                onOpenNewOrder={() => setIsNewOrderModalOpen(true)}
-                onOpenProject={handleOpenProject}
-                onDuplicateProject={handleDuplicateProject}
-                onDeleteProject={handleDeleteProject}
-                onChangeProjectStatus={handleChangeProjectStatus}
-              />
-            </div>
+          <div className="flex-1 flex flex-col h-full overflow-hidden">
+            <OrdersDashboard
+              projects={projects}
+              statusFilter={statusFilter}
+              searchQuery={searchQuery}
+              onOpenNewOrder={() => setIsNewOrderModalOpen(true)}
+              onOpenProject={handleOpenProject}
+              onDuplicateProject={handleDuplicateProject}
+              onDeleteProject={handleDeleteProject}
+              onChangeProjectStatus={handleChangeProjectStatus}
+            />
           </div>
         )}
 
@@ -1229,6 +1228,7 @@ export function App() {
         inEditorMode={activeTab === 'editor'}
         onBackToOrders={() => setActiveTab('orders')}
         onOpenMobilePhotos={() => setIsMobilePhotosOpen(true)}
+        onOpenMobileSettings={() => setIsMobileSettingsOpen(true)}
         onQuickAutoLayout={handleQuickAutoLayout}
         onOpenExportModal={() => setIsExportModalOpen(true)}
         photosCount={activeProject?.photos.length ?? 0}
@@ -1243,7 +1243,7 @@ export function App() {
             onClick={() => setIsMobilePhotosOpen(false)}
           />
           {/* Bottom Sheet */}
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-20px_60px_rgba(0,0,0,0.25)] max-h-[75dvh] flex flex-col overflow-hidden border-t border-stone-200/60">
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-20px_60px_rgba(0,0,0,0.25)] max-h-[78dvh] flex flex-col overflow-hidden border-t border-stone-200/60">
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-2 shrink-0">
               <div className="w-10 h-1 rounded-full bg-stone-300" />
@@ -1291,6 +1291,62 @@ export function App() {
                   height: activeProject.layoutConfig.customHeightMm || 86
                 }}
                 onQuickAutoLayout={() => { handleQuickAutoLayout(); setIsMobilePhotosOpen(false); }}
+              />
+            </div>
+            {/* Safe area spacer */}
+            <div className="h-[max(env(safe-area-inset-bottom),12px)] shrink-0" />
+          </div>
+        </div>
+      )}
+
+      {/* Mobile: Thiết lập in Bottom Sheet */}
+      {isMobileSettingsOpen && activeProject && (
+        <div className="fixed inset-0 z-[60] md:hidden">
+          {/* Scrim */}
+          <div
+            className="absolute inset-0 bg-stone-950/50 backdrop-blur-sm"
+            onClick={() => setIsMobileSettingsOpen(false)}
+          />
+          {/* Bottom Sheet */}
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-20px_60px_rgba(0,0,0,0.25)] max-h-[82dvh] flex flex-col overflow-hidden border-t border-stone-200/60">
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-2 shrink-0">
+              <div className="w-10 h-1 rounded-full bg-stone-300" />
+            </div>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 pb-3 shrink-0 border-b border-stone-100">
+              <div>
+                <span className="font-bold text-stone-900 text-base">Thiết lập in & Khổ giấy</span>
+              </div>
+              <button
+                onClick={() => setIsMobileSettingsOpen(false)}
+                className="w-7 h-7 rounded-full bg-stone-100 flex items-center justify-center active:scale-90 transition"
+              >
+                <span className="text-stone-500 text-sm font-bold">✕</span>
+              </button>
+            </div>
+            {/* PrintSettingsAccordion inside sheet */}
+            <div className="flex-1 overflow-y-auto overscroll-contain">
+              <PrintSettingsAccordion
+                paperConfig={activeProject.paperConfig}
+                layoutConfig={activeProject.layoutConfig}
+                onChangePaperConfig={(cfg) => {
+                  triggerLayoutRecalculation(cfg, activeProject.layoutConfig, activeProject.photos, activeProject);
+                }}
+                onChangeLayoutConfig={(cfg) => {
+                  triggerLayoutRecalculation(activeProject.paperConfig, cfg, activeProject.photos, activeProject);
+                }}
+                onQuickAutoLayout={() => {
+                  handleQuickAutoLayout();
+                  setIsMobileSettingsOpen(false);
+                }}
+                photosCount={activeProject.photos.length}
+                totalPages={activeProject.pages.length}
+                wastePercent={currentPage ? currentPage.wastePercent : 0}
+                onOpenExportModal={() => {
+                  setIsMobileSettingsOpen(false);
+                  setIsExportModalOpen(true);
+                }}
               />
             </div>
             {/* Safe area spacer */}

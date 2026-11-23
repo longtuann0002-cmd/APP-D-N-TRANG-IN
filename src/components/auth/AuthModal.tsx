@@ -89,22 +89,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 select-none">
-      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none">
+      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-md max-h-[92dvh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-stone-100 flex items-center justify-between">
+        <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-stone-100 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <Database className="w-5 h-5 text-brand-600" />
             <h2 className="text-base font-bold text-stone-900">Tài khoản & Cơ sở dữ liệu</h2>
           </div>
-          <button onClick={onClose} className="p-1 text-stone-400 hover:text-stone-700 rounded-lg">
+          <button onClick={onClose} className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Sub Tabs */}
-        <div className="flex border-b border-stone-100 bg-stone-50 px-6 pt-2">
+        <div className="flex border-b border-stone-100 bg-stone-50 px-5 sm:px-6 pt-2 shrink-0">
           <button
             onClick={() => setActiveTab('supabase')}
             className={`pb-2 px-3 text-xs font-bold transition border-b-2 ${
@@ -127,7 +127,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
         </div>
 
-        <div className="p-6 text-xs space-y-4">
+        <div className="p-5 sm:p-6 pb-[max(env(safe-area-inset-bottom),20px)] flex-1 overflow-y-auto text-xs space-y-4">
           
           {activeTab === 'supabase' ? (
             <form onSubmit={handleSaveSupabaseConfig} className="space-y-4">

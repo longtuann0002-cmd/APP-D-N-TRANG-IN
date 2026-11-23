@@ -97,7 +97,7 @@ export const PhotoLibrarySidebar: React.FC<PhotoLibrarySidebarProps> = ({
   };
 
   return (
-    <aside className="w-[260px] h-full bg-white border-r border-studio-border flex flex-col shrink-0 select-none z-10">
+    <aside className="w-full md:w-[260px] h-full bg-white border-r border-studio-border flex flex-col shrink-0 select-none z-10">
       {/* Header: 2 rows — avoids overflow/wrapping */}
       <div className="px-3 pt-2.5 pb-2 border-b border-stone-100 space-y-1.5">
         {/* Row 1: "Kho ảnh [n]" left + "+ Thêm ảnh" right */}
@@ -236,7 +236,7 @@ export const PhotoLibrarySidebar: React.FC<PhotoLibrarySidebarProps> = ({
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-2 gap-2">
             {displayedPhotos.map((photo, idx) => {
               const isSelected = selectedPhotoId === photo.id;
               const usedCount = assignedSlotsCountMap?.get(photo.id) || 0;

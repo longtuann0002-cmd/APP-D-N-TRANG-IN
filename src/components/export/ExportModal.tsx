@@ -133,36 +133,36 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 select-none">
-      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none">
+      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-lg max-h-[92dvh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-stone-100 flex items-center justify-between">
+        <div className="px-5 sm:px-6 py-3.5 border-b border-stone-100 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-stone-900 text-white flex items-center justify-center">
               <FileDown className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-stone-900">Xuất file in ấn chuyên nghiệp</h2>
-              <span className="text-xs text-stone-400">Chuẩn kích thước vật lý mm và DPI sắc nét</span>
+              <h2 className="text-sm sm:text-base font-bold text-stone-900">Xuất file in ấn chuyên nghiệp</h2>
+              <span className="text-[11px] text-stone-400">Chuẩn kích thước vật lý mm và DPI sắc nét</span>
             </div>
           </div>
           <button 
             disabled={isExporting} 
             onClick={onClose} 
-            className="p-1 text-stone-400 hover:text-stone-700 disabled:opacity-40"
+            className="p-1.5 text-stone-400 hover:text-stone-700 disabled:opacity-40"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-5 text-xs">
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto space-y-4 sm:space-y-5 text-xs">
           
           {/* Format selection: PDF vs JPG */}
           <div>
             <label className="font-semibold text-stone-800 block mb-2">Định dạng file xuất</label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <button
                 type="button"
                 disabled={isExporting}
@@ -173,7 +173,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                     : 'border-stone-200 text-stone-700 hover:bg-stone-50'
                 }`}
               >
-                <div className={`p-2 rounded-lg ${exportFormat === 'pdf' ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-700'}`}>
+                <div className={`p-2 rounded-lg shrink-0 ${exportFormat === 'pdf' ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-700'}`}>
                   <FileDown className="w-4 h-4" />
                 </div>
                 <div>
@@ -192,7 +192,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                     : 'border-stone-200 text-stone-700 hover:bg-stone-50'
                 }`}
               >
-                <div className={`p-2 rounded-lg ${exportFormat === 'jpg' ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-700'}`}>
+                <div className={`p-2 rounded-lg shrink-0 ${exportFormat === 'jpg' ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-700'}`}>
                   <Image className="w-4 h-4" />
                 </div>
                 <div>
@@ -305,21 +305,21 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-stone-50 border-t border-stone-100 flex items-center justify-between">
+        <div className="px-5 sm:px-6 py-3.5 pb-[max(env(safe-area-inset-bottom),14px)] bg-stone-50 border-t border-stone-100 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-2.5 shrink-0">
           <button
             type="button"
             disabled={isExporting}
             onClick={onClose}
-            className="px-3 py-2 text-stone-500 hover:text-stone-800 font-semibold text-xs disabled:opacity-40"
+            className="px-3 py-2 text-stone-500 hover:text-stone-800 font-semibold text-xs disabled:opacity-40 text-center sm:text-left"
           >
             Đóng
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <button
               type="button"
               disabled={isExporting}
               onClick={handleExport}
-              className="px-4 py-2 bg-white hover:bg-stone-100 text-stone-800 border border-stone-300 font-bold text-xs rounded-xl transition active:scale-98 disabled:opacity-50 flex items-center gap-1.5 shadow-2xs"
+              className="px-4 py-2.5 sm:py-2 bg-white hover:bg-stone-100 text-stone-800 border border-stone-300 font-bold text-xs rounded-xl transition active:scale-98 disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-2xs"
               title="Tải file PDF hoặc ảnh về máy tính để lưu trữ"
             >
               <FileDown className="w-4 h-4 text-stone-600" />
@@ -329,7 +329,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               type="button"
               disabled={isExporting}
               onClick={handleDirectPrint}
-              className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-98 disabled:opacity-50 flex items-center gap-1.5"
+              className="px-5 py-2.5 sm:py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-98 disabled:opacity-50 flex items-center justify-center gap-1.5"
               title="Gửi trực tiếp đến máy in hệ thống (Canon, Epson, Brother...) không cần tải file"
             >
               <Printer className="w-4 h-4 text-white" />

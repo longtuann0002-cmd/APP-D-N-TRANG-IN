@@ -42,7 +42,7 @@ export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
   const maxAmount = Math.max(...weeklyData.map(d => d.amount));
 
   return (
-    <div className="flex-1 h-full bg-studio-bg overflow-y-auto p-4 md:p-8 select-none">
+    <div className="flex-1 h-full bg-studio-bg overflow-y-auto p-4 md:p-8 pb-28 md:pb-8 pt-[max(env(safe-area-inset-top),16px)] md:pt-8 select-none">
       <div className="max-w-4xl mx-auto space-y-6">
         
         {/* Header */}

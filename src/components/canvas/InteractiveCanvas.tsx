@@ -206,12 +206,20 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
         <canvas
           ref={canvasRef}
           onClick={handleClick}
+          onTouchEnd={(e) => {
+            if (e.changedTouches && e.changedTouches.length > 0) {
+              const touch = e.changedTouches[0];
+              onSelectPage(pageIndex);
+              const slotId = getSlotAtPoint(touch.clientX, touch.clientY);
+              onSelectSlot(slotId);
+            }
+          }}
           onMouseMove={handleMouseMove}
           onMouseLeave={() => onHoverSlot(null)}
           onDragOver={handleDragOver}
           onDragLeave={() => onDragOverSlot(null)}
           onDrop={handleDrop}
-          className="cursor-pointer"
+          className="cursor-pointer touch-manipulation"
         />
       </div>
     </div>
@@ -452,8 +460,8 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
 
       {/* Selected Slot Floating Actions */}
       {selectedSlotId && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-stone-900 text-white px-3.5 py-1.5 rounded-xl shadow-xl text-xs animate-in fade-in duration-150">
-          <span>
+        <div className="absolute top-2 md:top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 md:gap-2 bg-stone-900/95 text-white px-2.5 md:px-3.5 py-1.5 rounded-2xl shadow-2xl text-xs backdrop-blur-md max-w-[94vw] overflow-x-auto no-scrollbar border border-white/10 animate-in fade-in duration-150">
+          <span className="shrink-0 whitespace-nowrap">
             Ô: <strong className="text-amber-400">
               {subSlotIndex !== null ? `Ảnh #${subSlotIndex + 1}` : (selectedSlot?.slot?.presetName || selectedSlot?.slot?.label || 'Khung in')}
             </strong>
