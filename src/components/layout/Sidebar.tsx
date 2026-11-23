@@ -46,7 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside 
-      className={`h-screen bg-studio-sidebar border-r border-studio-border flex flex-col justify-between transition-all duration-300 z-30 select-none ${
+      className={`hidden md:flex h-screen bg-studio-sidebar border-r border-studio-border flex-col justify-between transition-all duration-300 z-30 select-none ${
         collapsed ? 'w-16' : 'w-56'
       }`}
     >
@@ -54,12 +54,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div>
         <div className="h-14 flex items-center px-4 border-b border-studio-border/60">
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => onSelectTab('orders')}>
-            <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold shadow-sm shadow-brand-500/30">
-              <span className="text-base tracking-tighter">P</span>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-stone-900 via-stone-800 to-amber-600 flex items-center justify-center text-white font-extrabold shadow-sm shadow-stone-900/30">
+              <span className="text-base tracking-tighter">C</span>
             </div>
             {!collapsed && (
               <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-lg text-stone-900 tracking-tight">PhotoDesk</span>
+                <span className="font-bold text-lg text-stone-900 tracking-tight">Caos</span>
+                <span className="text-[10px] bg-stone-900 text-amber-300 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Print</span>
               </div>
             )}
           </div>

@@ -38,6 +38,7 @@ import { AuthModal } from './components/auth/AuthModal';
 import { ExportModal } from './components/export/ExportModal';
 import { PhotoCropAdjustModal } from './components/media/PhotoCropAdjustModal';
 import { PhotoFilterModal } from './components/media/PhotoFilterModal';
+import { CaosDynamicCapsule } from './components/layout/CaosDynamicCapsule';
 
 export function App() {
   // Navigation (mặc định vào giao diện chính Đơn hàng khi mở app hoặc F5)
@@ -127,6 +128,8 @@ export function App() {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [cropModalPhoto, setCropModalPhoto] = useState<PhotoItem | null>(null);
   const [filterModalPhoto, setFilterModalPhoto] = useState<PhotoItem | null>(null);
+  // Mobile: Kho ảnh bottom sheet open state
+  const [isMobilePhotosOpen, setIsMobilePhotosOpen] = useState(false);
 
   // Editor specific state
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
@@ -866,9 +869,9 @@ export function App() {
   const currentPage = activeProject?.pages[currentPageIndex] || activeProject?.pages[0];
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-studio-bg font-sans antialiased text-stone-800">
+    <div className="flex h-[100dvh] w-screen overflow-hidden bg-studio-bg font-sans antialiased text-stone-800">
       
-      {/* Left Application Slim Sidebar */}
+      {/* Left Application Slim Sidebar — Desktop only (hidden on mobile) */}
       <Sidebar
         activeTab={activeTab}
         onSelectTab={(tab) => {
@@ -886,32 +889,91 @@ export function App() {
       {/* Main Work Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         
-        {/* Top Navigation Bar (when not in Editor) */}
+        {/* Mobile Brand Header — visible only on mobile, hidden on desktop */}
         {activeTab !== 'editor' && (
-          <TopBar
-            currentStatusFilter={statusFilter}
-            onSelectStatusFilter={setStatusFilter}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onOpenNewOrder={() => setIsNewOrderModalOpen(true)}
-            onOpenAuth={() => setIsAuthModalOpen(true)}
-            statusCounts={statusCounts}
-            isSupabaseConnected={supabaseConnected}
-          />
+          <div className="flex md:hidden items-center justify-between px-4 pt-[max(env(safe-area-inset-top),12px)] pb-3 bg-white border-b border-stone-200/70">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-stone-900 via-stone-800 to-amber-600 flex items-center justify-center text-white font-extrabold text-sm shadow-sm">
+                C
+              </div>
+              <span className="font-extrabold text-stone-900 text-base tracking-tight">Caos</span>
+              <span className="text-[9px] bg-stone-900 text-amber-300 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ml-0.5">Print</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Tìm đơn..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-32 pl-3 pr-2 py-1.5 bg-stone-100 border border-stone-200 rounded-full text-xs placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-900/20 focus:bg-white transition"
+              />
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="w-8 h-8 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center active:scale-90 transition"
+              >
+                <span className="text-sm">👤</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Desktop Top Navigation Bar (when not in Editor) */}
+        {activeTab !== 'editor' && (
+          <div className="hidden md:block">
+            <TopBar
+              currentStatusFilter={statusFilter}
+              onSelectStatusFilter={setStatusFilter}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onOpenNewOrder={() => setIsNewOrderModalOpen(true)}
+              onOpenAuth={() => setIsAuthModalOpen(true)}
+              statusCounts={statusCounts}
+              isSupabaseConnected={supabaseConnected}
+            />
+          </div>
+        )}
+
+        {/* Mobile status filter chips (visible in orders tab) */}
+        {activeTab === 'orders' && (
+          <div className="flex md:hidden items-center gap-1.5 overflow-x-auto no-scrollbar py-2 px-4 bg-white border-b border-stone-100">
+            {[
+              { id: 'all' as const, label: 'Tất cả' },
+              { id: 'in_progress' as const, label: 'Đang làm' },
+              { id: 'printed' as const, label: 'Đã in' },
+              { id: 'new' as const, label: 'Mới' },
+              { id: 'delivered' as const, label: 'Đã giao' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setStatusFilter(tab.id)}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition active:scale-95 ${
+                  statusFilter === tab.id
+                    ? 'bg-stone-900 text-white shadow-sm'
+                    : 'bg-stone-100 text-stone-600'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         )}
 
         {/* Tab 1: Orders Dashboard */}
         {activeTab === 'orders' && (
-          <OrdersDashboard
-            projects={projects}
-            statusFilter={statusFilter}
-            searchQuery={searchQuery}
-            onOpenNewOrder={() => setIsNewOrderModalOpen(true)}
-            onOpenProject={handleOpenProject}
-            onDuplicateProject={handleDuplicateProject}
-            onDeleteProject={handleDeleteProject}
-            onChangeProjectStatus={handleChangeProjectStatus}
-          />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto pb-[80px] md:pb-0">
+              <OrdersDashboard
+                projects={projects}
+                statusFilter={statusFilter}
+                searchQuery={searchQuery}
+                onOpenNewOrder={() => setIsNewOrderModalOpen(true)}
+                onOpenProject={handleOpenProject}
+                onDuplicateProject={handleDuplicateProject}
+                onDeleteProject={handleDeleteProject}
+                onChangeProjectStatus={handleChangeProjectStatus}
+              />
+            </div>
+          </div>
         )}
 
         {/* Tab 2: Studio Layout Editor Workspace (Exact PicDesk 3-Column Layout) */}
@@ -1101,9 +1163,11 @@ export function App() {
 
         {/* Tab 3: Template Gallery */}
         {activeTab === 'templates' && (
-          <TemplateGallery
-            onCreateProjectFromTemplate={handleCreateProject}
-          />
+          <div className="flex-1 overflow-y-auto pb-[80px] md:pb-0">
+            <TemplateGallery
+              onCreateProjectFromTemplate={handleCreateProject}
+            />
+          </div>
         )}
 
         {/* Tab 4: Customer CRM */}
@@ -1146,6 +1210,90 @@ export function App() {
         )}
 
       </div>
+
+      {/* ============================================================ */}
+      {/* CAOS DYNAMIC CAPSULE — Floating Spatial Navigation (Mobile)   */}
+      {/* ============================================================ */}
+      <CaosDynamicCapsule
+        activeTab={activeTab}
+        onSelectTab={(tab) => {
+          setActiveTab(tab);
+          if (tab === 'calibration') setIsCalibrationModalOpen(true);
+        }}
+        orderCount={projects.length}
+        onOpenNewOrder={() => setIsNewOrderModalOpen(true)}
+        inEditorMode={activeTab === 'editor'}
+        onBackToOrders={() => setActiveTab('orders')}
+        onOpenMobilePhotos={() => setIsMobilePhotosOpen(true)}
+        onQuickAutoLayout={handleQuickAutoLayout}
+        onOpenExportModal={() => setIsExportModalOpen(true)}
+        photosCount={activeProject?.photos.length ?? 0}
+      />
+
+      {/* Mobile: Kho ảnh Bottom Sheet (Spatial Dark Glass) */}
+      {isMobilePhotosOpen && activeProject && (
+        <div className="fixed inset-0 z-[60] md:hidden">
+          {/* Scrim */}
+          <div
+            className="absolute inset-0 bg-stone-950/50 backdrop-blur-sm"
+            onClick={() => setIsMobilePhotosOpen(false)}
+          />
+          {/* Bottom Sheet */}
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-20px_60px_rgba(0,0,0,0.25)] max-h-[75dvh] flex flex-col overflow-hidden border-t border-stone-200/60">
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-2 shrink-0">
+              <div className="w-10 h-1 rounded-full bg-stone-300" />
+            </div>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 pb-3 shrink-0 border-b border-stone-100">
+              <div>
+                <span className="font-bold text-stone-900 text-base">Kho ảnh</span>
+                <span className="ml-2 text-xs text-stone-500 font-medium">
+                  {activeProject.photos.length} ảnh
+                </span>
+              </div>
+              <button
+                onClick={() => setIsMobilePhotosOpen(false)}
+                className="w-7 h-7 rounded-full bg-stone-100 flex items-center justify-center active:scale-90 transition"
+              >
+                <span className="text-stone-500 text-sm font-bold">✕</span>
+              </button>
+            </div>
+            {/* PhotoLibrarySidebar inside sheet */}
+            <div className="flex-1 overflow-y-auto overscroll-contain">
+              <PhotoLibrarySidebar
+                photos={activeProject.photos}
+                totalSlotsNeeded={activeProject.totalPhotosCount}
+                onAddPhotos={handleAddPhotos}
+                onRemovePhoto={handleRemovePhoto}
+                onRotatePhoto={handleRotatePhoto}
+                selectedPhotoId={selectedPhotoId}
+                onSelectPhoto={(photoId) => {
+                  if (photoId && selectedSlotId) {
+                    handleDropPhotoOnSlot(selectedSlotId, photoId);
+                    setSelectedSlotId(null);
+                  } else {
+                    setSelectedPhotoId(photoId);
+                  }
+                  setIsMobilePhotosOpen(false);
+                }}
+                onAdjustPhotoCrop={(photo) => { setCropModalPhoto(photo); setIsMobilePhotosOpen(false); }}
+                onAdjustPhotoFilter={(photo) => { setFilterModalPhoto(photo); setIsMobilePhotosOpen(false); }}
+                onChangeCopiesCount={handleChangeCopiesCount}
+                onRemoveFromSlots={handleRemovePhotoFromAllSlots}
+                assignedSlotsCountMap={assignedSlotsCountMap}
+                slotDimensionsMm={{
+                  width: activeProject.layoutConfig.customWidthMm || 54,
+                  height: activeProject.layoutConfig.customHeightMm || 86
+                }}
+                onQuickAutoLayout={() => { handleQuickAutoLayout(); setIsMobilePhotosOpen(false); }}
+              />
+            </div>
+            {/* Safe area spacer */}
+            <div className="h-[max(env(safe-area-inset-bottom),12px)] shrink-0" />
+          </div>
+        </div>
+      )}
 
       {/* New Order Wizard Modal */}
       <NewOrderModal
