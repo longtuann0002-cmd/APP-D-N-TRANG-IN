@@ -42,7 +42,10 @@ export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
   const maxAmount = Math.max(...weeklyData.map(d => d.amount));
 
   return (
-    <div className="flex-1 h-full bg-studio-bg overflow-y-auto p-4 md:p-8 pb-28 md:pb-8 pt-[max(env(safe-area-inset-top),16px)] md:pt-8 select-none">
+    <div 
+      className="flex-1 h-full bg-studio-bg overflow-y-auto p-4 md:p-8 pb-28 md:pb-8 md:pt-8 select-none"
+      style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
+    >
       <div className="max-w-4xl mx-auto space-y-6">
         
         {/* Header */}
@@ -52,7 +55,7 @@ export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
               <span className="text-xl md:text-2xl font-black text-stone-900 tracking-tight">
                 Báo cáo Doanh số & Hiệu suất
               </span>
-              <span className="text-[10px] font-extrabold uppercase tracking-wider bg-stone-900 text-amber-300 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 shadow-2xs">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider bg-stone-900 text-orange-400 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 shadow-2xs">
                 <Sparkles className="w-2.5 h-2.5" /> Caos Lab
               </span>
             </div>

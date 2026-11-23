@@ -249,7 +249,10 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
   );
 
   return (
-    <div className="flex-1 h-full bg-studio-bg overflow-y-auto p-4 md:p-8 pb-36 md:pb-8 pt-[max(env(safe-area-inset-top),16px)] md:pt-8 select-none">
+    <div 
+      className="flex-1 h-full bg-studio-bg overflow-y-auto p-4 md:p-8 pb-36 md:pb-8 md:pt-8 select-none"
+      style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
+    >
       <div className="max-w-6xl mx-auto">
         
         {/* Header */}

@@ -171,7 +171,7 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
     <header 
       className="safe-area-top-header relative border-b border-stone-200 px-3 flex items-center justify-between shrink-0 select-none z-30 pb-2 md:py-0 md:h-12"
       style={{ 
-        paddingTop: 'max(env(safe-area-inset-top, 0px), 8px)',
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)',
         backgroundColor: '#ffffff',
         isolation: 'isolate',
         WebkitBackfaceVisibility: 'hidden',

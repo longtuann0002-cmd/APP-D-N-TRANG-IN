@@ -86,7 +86,7 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
         <div 
           className="safe-area-top-header relative z-20 p-4 border-b border-stone-200 space-y-3 md:pt-4"
           style={{ 
-            paddingTop: 'max(env(safe-area-inset-top, 0px), 8px)',
+            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)',
             backgroundColor: '#ffffff', 
             isolation: 'isolate' 
           }}

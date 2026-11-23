@@ -935,7 +935,7 @@ export function App() {
           <header 
             className="safe-area-top-header relative z-30 flex md:hidden flex-col border-b border-stone-200 shrink-0"
             style={{ 
-              paddingTop: 'max(env(safe-area-inset-top, 0px), 8px)',
+              paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)',
               backgroundColor: '#ffffff', 
               isolation: 'isolate', 
               WebkitBackfaceVisibility: 'hidden', 
