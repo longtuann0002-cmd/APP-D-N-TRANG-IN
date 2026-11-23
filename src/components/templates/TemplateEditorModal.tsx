@@ -951,7 +951,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-5 sm:px-6 py-3.5 pb-[max(env(safe-area-inset-bottom),14px)] border-t border-stone-100 bg-stone-50/50 flex items-center justify-between shrink-0">
+        <div className="px-5 sm:px-6 py-3.5 pb-[max(env(safe-area-inset-bottom),22px)] border-t border-stone-100 bg-stone-50/50 flex items-center justify-between shrink-0">
           <button
             type="button"
             onClick={onClose}

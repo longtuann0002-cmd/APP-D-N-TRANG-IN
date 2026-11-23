@@ -55,7 +55,7 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
     return (
       <nav
         aria-label="Editor Mobile Action Bar"
-        className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-stone-950/95 backdrop-blur-2xl border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.5)] pt-1.5 pb-[max(env(safe-area-inset-bottom),10px)] px-3 select-none"
+        className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-stone-950/98 backdrop-blur-2xl border-t border-white/15 shadow-[0_-12px_40px_rgba(0,0,0,0.6)] pt-2.5 pb-[max(env(safe-area-inset-bottom),26px)] px-3 select-none"
       >
         <div className="flex items-center justify-between gap-1 max-w-md mx-auto">
           {/* Back to Orders */}
@@ -132,7 +132,7 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
   return (
     <nav
       aria-label="Main Mobile Navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-stone-950/95 backdrop-blur-2xl border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.5)] pt-1.5 pb-[max(env(safe-area-inset-bottom),10px)] px-3 select-none"
+      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-stone-950/98 backdrop-blur-2xl border-t border-white/15 shadow-[0_-12px_40px_rgba(0,0,0,0.6)] pt-2.5 pb-[max(env(safe-area-inset-bottom),26px)] px-3 select-none"
     >
       <div className="flex items-center justify-between max-w-md mx-auto">
         {/* Tab 1: Đơn hàng */}

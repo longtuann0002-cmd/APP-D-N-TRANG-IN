@@ -576,7 +576,7 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
       {/* NOTE: viewport uses overflow-auto WITHOUT justify-center to avoid left-overflow lock (flex justify-center clips left side) */}
       <div ref={viewportRef} className="flex-1 w-full overflow-auto p-3 md:p-10 scroll-smooth">
         {!showAllPagesView ? (
-          <div className="flex items-start gap-10 min-w-max mx-auto pb-16">
+          <div className="flex items-start gap-10 min-w-max mx-auto pb-36 md:pb-16">
             {pages.map((page, pIdx) => (
               <SingleSheetView
                 key={pIdx}

@@ -300,7 +300,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
       <div className="flex-1 flex overflow-hidden">
         
         {/* Left: Templates Cards Grid */}
-        <div className="flex-1 p-3 md:p-8 overflow-y-auto pb-28 md:pb-8">
+        <div className="flex-1 p-3 md:p-8 overflow-y-auto pb-36 md:pb-8">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
             {filteredTemplates.map(template => {
               const isSelected = !isSelectMode && selectedTemplate?.id === template.id;
@@ -827,7 +827,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
 
       {/* Mobile Floating Action Card when a template is selected */}
       {selectedTemplate && (
-        <div className="md:hidden fixed bottom-16 left-3 right-3 z-40 bg-stone-950/95 backdrop-blur-xl border border-white/20 p-3 rounded-2xl shadow-2xl text-white flex items-center justify-between gap-3 animate-in slide-in-from-bottom duration-200">
+        <div className="md:hidden fixed bottom-[calc(max(env(safe-area-inset-bottom),26px)+64px)] left-3 right-3 z-30 bg-stone-950/95 backdrop-blur-xl border border-white/20 p-3 rounded-2xl shadow-2xl text-white flex items-center justify-between gap-3 animate-in slide-in-from-bottom duration-200">
           <div className="min-w-0 flex-1">
             <span className="text-[10px] text-amber-300 font-extrabold uppercase tracking-wider block">Mẫu đang chọn</span>
             <span className="font-bold text-xs truncate block text-white">{selectedTemplate.name}</span>

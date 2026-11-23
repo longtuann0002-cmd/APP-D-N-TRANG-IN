@@ -80,7 +80,7 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
     <div className="flex-1 h-full flex bg-studio-bg overflow-hidden select-none">
       
       {/* Left Sidebar: Customer List */}
-      <div className={`w-full md:w-80 h-full bg-white border-r border-studio-border flex flex-col shrink-0 pb-28 md:pb-0 ${
+      <div className={`w-full md:w-80 h-full bg-white border-r border-studio-border flex flex-col shrink-0 pb-36 md:pb-0 ${
         showDetailOnMobile ? 'hidden md:flex' : 'flex'
       }`}>
         <div className="p-4 border-b border-stone-100 space-y-3 pt-[max(env(safe-area-inset-top),16px)] md:pt-4">
@@ -173,7 +173,7 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
 
       {/* Right Column: Customer Details */}
       {selectedCustomer ? (
-        <div className={`flex-1 w-full h-full flex-col overflow-y-auto p-4 md:p-8 pb-32 md:pb-8 pt-[max(env(safe-area-inset-top),16px)] md:pt-8 ${
+        <div className={`flex-1 w-full h-full flex-col overflow-y-auto p-4 md:p-8 pb-36 md:pb-8 pt-[max(env(safe-area-inset-top),16px)] md:pt-8 ${
           showDetailOnMobile ? 'flex' : 'hidden md:flex'
         }`}>
           {/* Mobile Back Button */}

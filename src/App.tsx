@@ -1314,7 +1314,7 @@ export function App() {
               />
             </div>
             {/* Safe area spacer */}
-            <div className="h-[max(env(safe-area-inset-bottom),12px)] shrink-0" />
+            <div className="h-[max(env(safe-area-inset-bottom),24px)] shrink-0" />
           </div>
         </div>
       )}
@@ -1370,7 +1370,7 @@ export function App() {
               />
             </div>
             {/* Safe area spacer */}
-            <div className="h-[max(env(safe-area-inset-bottom),12px)] shrink-0" />
+            <div className="h-[max(env(safe-area-inset-bottom),24px)] shrink-0" />
           </div>
         </div>
       )}

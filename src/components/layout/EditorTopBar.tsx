@@ -168,16 +168,16 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
   };
 
   return (
-    <header className="h-12 md:h-12 bg-white border-b border-studio-border px-2 md:px-3 flex items-center justify-between shrink-0 select-none z-20 pt-[max(env(safe-area-inset-top),4px)] md:pt-0">
+    <header className="bg-white border-b border-stone-200/90 px-3 flex items-center justify-between shrink-0 select-none z-30 pt-[max(env(safe-area-inset-top),10px)] pb-2 md:py-0 md:h-12 shadow-xs">
       
       {/* Left: Back Arrow + Editable Order Name + Status Badge */}
       <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
         <button
           onClick={onBackToOrders}
-          className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition active:scale-90"
+          className="p-1.5 text-stone-700 hover:text-stone-950 hover:bg-stone-100 rounded-lg transition active:scale-90"
           title="Quay lại danh sách đơn"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
         </button>
 
         {isEditingTitle ? (
@@ -198,7 +198,7 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
             }}
             className="flex items-center gap-1 cursor-pointer hover:bg-stone-50 px-1.5 py-0.5 rounded transition group max-w-[110px] sm:max-w-[160px] md:max-w-none"
           >
-            <span className="text-xs font-bold text-stone-900 truncate">{orderName}</span>
+            <span className="text-xs md:text-sm font-extrabold text-stone-900 tracking-tight truncate">{orderName}</span>
             <Edit3 className="w-3 h-3 text-stone-400 group-hover:text-stone-700 shrink-0" />
           </div>
         )}
@@ -208,7 +208,7 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
           <select
             value={orderStatus}
             onChange={(e) => onChangeStatus(e.target.value as OrderStatus)}
-            className={`text-[10px] font-bold rounded-full px-1.5 py-0.5 border cursor-pointer focus:outline-none ${getStatusColor(orderStatus)}`}
+            className={`text-[10px] font-extrabold rounded-full px-2 py-0.5 border cursor-pointer focus:outline-none ${getStatusColor(orderStatus)}`}
           >
             <option value="new">Mới</option>
             <option value="in_progress">Đang làm</option>
@@ -219,7 +219,7 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
       </div>
 
       {/* Center: Page Nav + Zoom + View Controls */}
-      <div className="flex items-center gap-1 md:gap-2 bg-stone-50/80 border border-stone-200/80 rounded-xl px-1.5 md:px-2 py-0.5 md:py-1">
+      <div className="flex items-center gap-1 md:gap-2 bg-stone-100/90 border border-stone-200 rounded-xl px-1.5 md:px-2 py-0.5 md:py-1">
         
         {/* Page navigation: < Tờ X/Y > */}
         <div className="flex items-center gap-0.5 md:gap-1 md:pr-2 md:border-r border-stone-200">

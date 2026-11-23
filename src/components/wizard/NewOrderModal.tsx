@@ -1564,7 +1564,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-4 md:px-7 py-3 md:py-4 pb-[max(env(safe-area-inset-bottom),12px)] border-t border-stone-100 flex items-center justify-between shrink-0 bg-white">
+        <div className="px-4 md:px-7 py-3 md:py-4 pb-[max(env(safe-area-inset-bottom),22px)] border-t border-stone-100 flex items-center justify-between shrink-0 bg-white">
           <div className="flex items-center gap-2">
             <button 
               type="button"
