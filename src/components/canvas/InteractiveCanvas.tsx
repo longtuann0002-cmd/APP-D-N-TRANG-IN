@@ -644,8 +644,8 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
         )}
       </div>
 
-      {/* Floating Sheet Navigation Pill at bottom center matching PicDesk screenshot */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-xs px-3.5 py-1.5 rounded-full shadow-md border border-stone-200/90 text-xs">
+      {/* Floating Sheet Navigation Pill at bottom center matching PicDesk screenshot (Desktop Only) */}
+      <div className="hidden md:flex absolute bottom-4 left-1/2 -translate-x-1/2 z-10 items-center gap-2 bg-white/95 backdrop-blur-xs px-3.5 py-1.5 rounded-full shadow-md border border-stone-200/90 text-xs">
         <div className="flex items-center gap-1">
           <button
             disabled={currentPageIndex === 0}
@@ -688,8 +688,8 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
         </span>
       </div>
 
-      {/* Floating help button at bottom-right */}
-      <div className="absolute bottom-4 right-4 z-10">
+      {/* Floating help button at bottom-right (Desktop Only) */}
+      <div className="hidden md:block absolute bottom-4 right-4 z-10">
         <button
           className="w-9 h-9 rounded-full bg-stone-900 hover:bg-stone-800 text-white flex items-center justify-center shadow-lg transition active:scale-95"
           title="Trợ giúp"
