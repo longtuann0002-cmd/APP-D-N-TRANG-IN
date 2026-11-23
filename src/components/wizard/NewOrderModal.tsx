@@ -479,7 +479,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-0 md:p-3 select-none">
+    <div className="fixed inset-0 z-[100] bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-0 md:p-3 select-none">
       <div className="bg-white rounded-none md:rounded-3xl shadow-2xl border-0 md:border border-stone-200/90 w-full max-w-6xl h-full md:h-[94vh] flex flex-col overflow-hidden animate-in fade-in duration-150">
         
         {/* Header */}

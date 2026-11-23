@@ -6,7 +6,8 @@ import {
   Sparkles,
   Trash2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Plus
 } from 'lucide-react';
 import { SheetLayout, PaperConfig, LayoutConfig, PhotoItem, PlacedPhoto } from '../../types';
 import { renderSheetToCanvas, getSlotSubCells } from '../../core/canvas/canvasRenderer';
@@ -37,6 +38,7 @@ interface InteractiveCanvasProps {
   // Controlled all-pages view from EditorTopBar
   showAllPagesView?: boolean;
   onCloseAllPagesView?: () => void;
+  onOpenMobilePhotos?: () => void;
 }
 
 interface PageCanvasProps {
@@ -246,6 +248,7 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
   onChangeScale,
   showAllPagesView: externalShowAllPagesView,
   onCloseAllPagesView,
+  onOpenMobilePhotos,
 }, ref) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -284,16 +287,24 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
   const fitToScreen = useCallback(() => {
     if (!containerRef.current || !currentPage) return;
     const { clientWidth, clientHeight } = containerRef.current;
-    const padding = 100;
+    const isMobile = clientWidth < 768;
+    const padding = isMobile ? 24 : 80;
     const availW = Math.max(100, clientWidth - padding);
     const availH = Math.max(100, clientHeight - padding);
 
-    // If 2 or more pages, fit so at least 1-2 pages can be seen comfortably
-    const scaleW = availW / (currentPage.paperWidth * (pages.length > 1 ? 1.6 : 1.0));
+    // If 2 or more pages on desktop, fit so at least 1-2 pages can be seen comfortably
+    const scaleW = availW / (currentPage.paperWidth * (!isMobile && pages.length > 1 ? 1.6 : 1.0));
     const scaleH = availH / currentPage.paperHeight;
     const idealScale = Math.min(scaleW, scaleH);
-    setScale(Math.max(1.0, Math.min(4.0, Math.round(idealScale * 10) / 10)));
+    setScale(Math.max(0.6, Math.min(4.0, Math.round(idealScale * 10) / 10)));
   }, [currentPage, pages.length, setScale]);
+
+  // Auto fit on mobile mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      fitToScreen();
+    }
+  }, [fitToScreen]);
 
   // Expose fitToScreen and scrollToPage to parent via ref
   useImperativeHandle(ref, () => ({
@@ -537,7 +548,19 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
               )}
             </>
           ) : (
-            <span className="text-stone-400 text-[11px] italic">Chưa có ảnh (Kéo ảnh từ cột trái vào đây)</span>
+            <div className="flex items-center gap-2">
+              <span className="text-stone-300 text-[11px] font-medium">Chưa có ảnh</span>
+              {onOpenMobilePhotos && (
+                <button
+                  type="button"
+                  onClick={onOpenMobilePhotos}
+                  className="flex items-center gap-1 px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-lg text-[11px] shadow-xs active:scale-95 transition"
+                >
+                  <Plus className="w-3 h-3 stroke-[3]" />
+                  <span>Chọn ảnh</span>
+                </button>
+              )}
+            </div>
           )}
 
           <button
@@ -551,7 +574,7 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
 
       {/* Central Viewport Area: Side-by-side continuous scrolling matching PicDesk screenshot */}
       {/* NOTE: viewport uses overflow-auto WITHOUT justify-center to avoid left-overflow lock (flex justify-center clips left side) */}
-      <div ref={viewportRef} className="flex-1 w-full overflow-auto p-10 scroll-smooth">
+      <div ref={viewportRef} className="flex-1 w-full overflow-auto p-3 md:p-10 scroll-smooth">
         {!showAllPagesView ? (
           <div className="flex items-start gap-10 min-w-max mx-auto pb-16">
             {pages.map((page, pIdx) => (

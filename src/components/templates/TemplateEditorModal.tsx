@@ -211,7 +211,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none animate-in fade-in duration-150">
       <div className="bg-white rounded-3xl shadow-2xl border border-stone-200 w-full max-w-4xl overflow-hidden flex flex-col max-h-[94dvh]">
         {/* Header */}
         <div className="px-5 sm:px-6 py-3.5 border-b border-stone-100 flex items-center justify-between bg-stone-50/70 shrink-0">

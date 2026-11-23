@@ -27,16 +27,23 @@ function getTemplatePatternCss(pattern?: string) {
 
 interface TemplateGalleryProps {
   onCreateProjectFromTemplate: (project: Project) => void;
+  onModalStateChange?: (isOpen: boolean) => void;
 }
 
 export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
-  onCreateProjectFromTemplate
+  onCreateProjectFromTemplate,
+  onModalStateChange
 }) => {
   const [templates, setTemplates] = useState<TemplateItem[]>(() => storageManager.getTemplates());
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'free' | 'seasonal' | 'polaroid' | 'photobooth'>('all');
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateItem>(() => templates[0] || storageManager.getTemplates()[0]);
   const [isEditorModalOpen, setIsEditorModalOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<TemplateItem | null>(null);
+
+  // Sync modal state with parent
+  useEffect(() => {
+    onModalStateChange?.(isEditorModalOpen);
+  }, [isEditorModalOpen, onModalStateChange]);
 
   // Multi-select mode
   const [isSelectMode, setIsSelectMode] = useState(false);

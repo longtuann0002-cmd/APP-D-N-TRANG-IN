@@ -131,6 +131,18 @@ export function App() {
   // Mobile: Kho ảnh & Cài đặt bottom sheets
   const [isMobilePhotosOpen, setIsMobilePhotosOpen] = useState(false);
   const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+
+  // Check if any modal or bottom sheet is open (used to hide bottom navigation)
+  const isAnyModalOpen = isNewOrderModalOpen ||
+    isCalibrationModalOpen ||
+    isAuthModalOpen ||
+    isExportModalOpen ||
+    !!cropModalPhoto ||
+    !!filterModalPhoto ||
+    isMobilePhotosOpen ||
+    isMobileSettingsOpen ||
+    isTemplateModalOpen;
 
   // Editor specific state
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
@@ -138,7 +150,12 @@ export function App() {
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   
   // Unified zoom scale across EditorTopBar and InteractiveCanvas (2.2 ≈ 100%)
-  const [canvasScale, setCanvasScale] = useState(2.2);
+  const [canvasScale, setCanvasScale] = useState(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      return Math.max(1.2, Math.min(1.7, Math.round(((window.innerWidth - 24) / 210) * 10) / 10));
+    }
+    return 2.2;
+  });
   const zoomPercent = Math.round((canvasScale / 2.2) * 100);
   const handleZoomIn = () => setCanvasScale(prev => Math.min(6.0, Math.round((prev + 0.3) * 10) / 10));
   const handleZoomOut = () => setCanvasScale(prev => Math.max(0.8, Math.round((prev - 0.3) * 10) / 10));
@@ -1138,6 +1155,7 @@ export function App() {
                 onChangeScale={setCanvasScale}
                 showAllPagesView={showAllPagesView}
                 onCloseAllPagesView={() => setShowAllPagesView(false)}
+                onOpenMobilePhotos={() => setIsMobilePhotosOpen(true)}
               />
 
               {/* Column 3: Thiết lập in (Right Accordion Panel 320px - Desktop Only) */}
@@ -1169,6 +1187,7 @@ export function App() {
           <div className="flex-1 overflow-y-auto pb-[80px] md:pb-0">
             <TemplateGallery
               onCreateProjectFromTemplate={handleCreateProject}
+              onModalStateChange={setIsTemplateModalOpen}
             />
           </div>
         )}
@@ -1232,6 +1251,7 @@ export function App() {
         onQuickAutoLayout={handleQuickAutoLayout}
         onOpenExportModal={() => setIsExportModalOpen(true)}
         photosCount={activeProject?.photos.length ?? 0}
+        hasActiveModal={isAnyModalOpen}
       />
 
       {/* Mobile: Kho ảnh Bottom Sheet (Spatial Dark Glass) */}

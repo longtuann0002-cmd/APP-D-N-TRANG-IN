@@ -109,7 +109,7 @@ export const PhotoCropAdjustModal: React.FC<PhotoCropAdjustModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none">
+    <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none">
       <div 
         className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-xl max-h-[92dvh] overflow-hidden flex flex-col"
         onMouseUp={handleMouseUp}
