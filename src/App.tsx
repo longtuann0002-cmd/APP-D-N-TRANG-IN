@@ -930,54 +930,80 @@ export function App() {
       {/* Main Work Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         
-        {/* Mobile Brand Header — visible only on mobile when on Orders dashboard */}
+        {/* Mobile Brand Header & Filter Chips — visible only on mobile when on Orders dashboard */}
         {activeTab === 'orders' && (
-          <div 
-            className="safe-area-top-header relative z-30 flex md:hidden items-center justify-between px-4 pb-2.5 border-b border-stone-200 shrink-0 shadow-2xs"
+          <header 
+            className="safe-area-top-header relative z-30 flex md:hidden flex-col border-b border-stone-200 shrink-0"
             style={{ 
-              paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 6px), 44px)',
+              paddingTop: 'max(env(safe-area-inset-top, 0px), 8px)',
               backgroundColor: '#ffffff', 
               isolation: 'isolate', 
               WebkitBackfaceVisibility: 'hidden', 
               transform: 'translateZ(0)' 
             }}
           >
-            <div 
-              onClick={() => setIsEditLogoModalOpen(true)}
-              className="flex items-center gap-2 cursor-pointer active:scale-95 transition group"
-              title="Nhấn để đổi logo & tên tiệm"
-            >
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-stone-900 via-stone-800 to-orange-500 flex items-center justify-center text-white font-extrabold text-sm shadow-sm overflow-hidden shrink-0 border border-stone-800">
-                {shopInfo.logoUrl ? (
-                  <img src={shopInfo.logoUrl} alt="Logo" className="w-full h-full object-cover" />
-                ) : (
-                  <span>{shopInfo.name.charAt(0).toUpperCase() || 'C'}</span>
-                )}
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="font-extrabold text-stone-950 text-base tracking-tight">{shopInfo.name || 'Caos'}</span>
-                <span className="text-[9px] bg-stone-900 text-orange-400 px-1.5 py-0.5 rounded font-black uppercase tracking-wider ml-0.5">
-                  {shopInfo.tagline || 'Print'}
-                </span>
-                <span className="text-stone-300 group-hover:text-stone-700 text-xs ml-0.5">✏️</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Tìm đơn..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-32 pl-3 pr-2 py-1.5 bg-stone-100 border border-stone-300 rounded-full text-xs text-stone-900 font-medium placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:bg-white transition"
-              />
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="w-8 h-8 rounded-full bg-stone-100 border border-stone-300 flex items-center justify-center active:scale-90 transition text-stone-800"
+            {/* Row 1: Brand & Search */}
+            <div className="flex items-center justify-between px-4 pt-1 pb-2">
+              <div 
+                onClick={() => setIsEditLogoModalOpen(true)}
+                className="flex items-center gap-2 cursor-pointer active:scale-95 transition group"
+                title="Nhấn để đổi logo & tên tiệm"
               >
-                <span className="text-sm">👤</span>
-              </button>
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-stone-900 via-stone-800 to-orange-500 flex items-center justify-center text-white font-extrabold text-sm shadow-sm overflow-hidden shrink-0 border border-stone-800">
+                  {shopInfo.logoUrl ? (
+                    <img src={shopInfo.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{shopInfo.name.charAt(0).toUpperCase() || 'C'}</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="font-extrabold text-stone-950 text-base tracking-tight">{shopInfo.name || 'Caos'}</span>
+                  <span className="text-[9px] bg-stone-900 text-orange-400 px-1.5 py-0.5 rounded font-black uppercase tracking-wider ml-0.5">
+                    {shopInfo.tagline || 'Print'}
+                  </span>
+                  <span className="text-stone-300 group-hover:text-stone-700 text-xs ml-0.5">✏️</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Tìm đơn..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-32 pl-3 pr-2 py-1.5 bg-stone-100 border border-stone-300 rounded-full text-xs text-stone-900 font-medium placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:bg-white transition"
+                />
+                <button
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="w-8 h-8 rounded-full bg-stone-100 border border-stone-300 flex items-center justify-center active:scale-90 transition text-stone-800"
+                >
+                  <span className="text-sm">👤</span>
+                </button>
+              </div>
             </div>
-          </div>
+
+            {/* Row 2: Status Filter Chips */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar px-4 pb-2.5">
+              {[
+                { id: 'all' as const, label: 'Tất cả' },
+                { id: 'in_progress' as const, label: 'Đang làm' },
+                { id: 'printed' as const, label: 'Đã in' },
+                { id: 'new' as const, label: 'Mới' },
+                { id: 'delivered' as const, label: 'Đã giao' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setStatusFilter(tab.id)}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition active:scale-95 ${
+                    statusFilter === tab.id
+                      ? 'bg-stone-900 text-white shadow-xs'
+                      : 'bg-stone-100 text-stone-600 border border-stone-200/60'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </header>
         )}
 
         {/* Desktop Top Navigation Bar (when not in Editor) */}
@@ -993,37 +1019,6 @@ export function App() {
               statusCounts={statusCounts}
               isSupabaseConnected={supabaseConnected}
             />
-          </div>
-        )}
-
-        {/* Mobile status filter chips (visible in orders tab) */}
-        {activeTab === 'orders' && (
-          <div 
-            className="relative z-20 flex md:hidden items-center gap-1.5 overflow-x-auto no-scrollbar py-2.5 px-4 border-b border-stone-200 shrink-0"
-            style={{ 
-              backgroundColor: '#ffffff', 
-              isolation: 'isolate' 
-            }}
-          >
-            {[
-              { id: 'all' as const, label: 'Tất cả' },
-              { id: 'in_progress' as const, label: 'Đang làm' },
-              { id: 'printed' as const, label: 'Đã in' },
-              { id: 'new' as const, label: 'Mới' },
-              { id: 'delivered' as const, label: 'Đã giao' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setStatusFilter(tab.id)}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition active:scale-95 ${
-                  statusFilter === tab.id
-                    ? 'bg-stone-900 text-white shadow-xs'
-                    : 'bg-stone-100 text-stone-600 border border-stone-200/60'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
           </div>
         )}
 
