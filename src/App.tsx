@@ -924,13 +924,21 @@ export function App() {
         
         {/* Mobile Brand Header — visible only on mobile when on Orders dashboard */}
         {activeTab === 'orders' && (
-          <div className="flex md:hidden items-center justify-between px-4 pt-[max(env(safe-area-inset-top),12px)] pb-3 bg-white border-b border-stone-200/70">
+          <div 
+            className="relative z-30 flex md:hidden items-center justify-between px-4 pt-[max(env(safe-area-inset-top),16px)] pb-3 border-b border-stone-200 shrink-0 shadow-2xs"
+            style={{ 
+              backgroundColor: '#ffffff', 
+              isolation: 'isolate', 
+              WebkitBackfaceVisibility: 'hidden', 
+              transform: 'translateZ(0)' 
+            }}
+          >
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-stone-900 via-stone-800 to-amber-600 flex items-center justify-center text-white font-extrabold text-sm shadow-sm">
                 C
               </div>
-              <span className="font-extrabold text-stone-900 text-base tracking-tight">Caos</span>
-              <span className="text-[9px] bg-stone-900 text-amber-300 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ml-0.5">Print</span>
+              <span className="font-extrabold text-stone-950 text-base tracking-tight">Caos</span>
+              <span className="text-[9px] bg-stone-900 text-amber-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ml-0.5">Print</span>
             </div>
             <div className="flex items-center gap-2">
               <input
@@ -938,11 +946,11 @@ export function App() {
                 placeholder="Tìm đơn..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-32 pl-3 pr-2 py-1.5 bg-stone-100 border border-stone-200 rounded-full text-xs placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-900/20 focus:bg-white transition"
+                className="w-32 pl-3 pr-2 py-1.5 bg-stone-100 border border-stone-300 rounded-full text-xs text-stone-900 font-medium placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-900/20 focus:bg-white transition"
               />
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="w-8 h-8 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center active:scale-90 transition"
+                className="w-8 h-8 rounded-full bg-stone-100 border border-stone-300 flex items-center justify-center active:scale-90 transition text-stone-800"
               >
                 <span className="text-sm">👤</span>
               </button>
@@ -968,7 +976,13 @@ export function App() {
 
         {/* Mobile status filter chips (visible in orders tab) */}
         {activeTab === 'orders' && (
-          <div className="flex md:hidden items-center gap-1.5 overflow-x-auto no-scrollbar py-2 px-4 bg-white border-b border-stone-100">
+          <div 
+            className="relative z-20 flex md:hidden items-center gap-1.5 overflow-x-auto no-scrollbar py-2.5 px-4 border-b border-stone-200 shrink-0"
+            style={{ 
+              backgroundColor: '#ffffff', 
+              isolation: 'isolate' 
+            }}
+          >
             {[
               { id: 'all' as const, label: 'Tất cả' },
               { id: 'in_progress' as const, label: 'Đang làm' },
@@ -981,8 +995,8 @@ export function App() {
                 onClick={() => setStatusFilter(tab.id)}
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition active:scale-95 ${
                   statusFilter === tab.id
-                    ? 'bg-stone-900 text-white shadow-sm'
-                    : 'bg-stone-100 text-stone-600'
+                    ? 'bg-stone-900 text-white shadow-xs'
+                    : 'bg-stone-100 text-stone-600 border border-stone-200/60'
                 }`}
               >
                 {tab.label}

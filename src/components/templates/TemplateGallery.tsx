@@ -202,7 +202,15 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
   return (
     <div className="flex-1 h-full flex flex-col bg-studio-bg overflow-hidden select-none">
       {/* Header — Responsive for Mobile & Desktop */}
-      <div className="bg-white border-b border-studio-border px-4 md:px-8 py-3 pt-[max(env(safe-area-inset-top),12px)] md:h-16 flex flex-col md:flex-row md:items-center justify-between shrink-0 gap-3">
+      <div 
+        className="relative z-20 border-b border-studio-border px-4 md:px-8 py-3 pt-[max(env(safe-area-inset-top),16px)] md:h-16 flex flex-col md:flex-row md:items-center justify-between shrink-0 gap-3 shadow-2xs"
+        style={{ 
+          backgroundColor: '#ffffff',
+          isolation: 'isolate',
+          WebkitBackfaceVisibility: 'hidden',
+          transform: 'translateZ(0)'
+        }}
+      >
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">Kho mẫu</span>
