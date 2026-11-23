@@ -933,9 +933,9 @@ export function App() {
         {/* Mobile Brand Header — visible only on mobile when on Orders dashboard */}
         {activeTab === 'orders' && (
           <div 
-            className="safe-area-top-header relative z-30 flex md:hidden items-center justify-between px-4 pb-3 border-b border-stone-200 shrink-0 shadow-2xs"
+            className="safe-area-top-header relative z-30 flex md:hidden items-center justify-between px-4 pb-2.5 border-b border-stone-200 shrink-0 shadow-2xs"
             style={{ 
-              paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 14px), 54px)',
+              paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 6px), 44px)',
               backgroundColor: '#ffffff', 
               isolation: 'isolate', 
               WebkitBackfaceVisibility: 'hidden', 

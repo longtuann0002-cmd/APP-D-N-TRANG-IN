@@ -84,8 +84,12 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
         showDetailOnMobile ? 'hidden md:flex' : 'flex'
       }`}>
         <div 
-          className="relative z-20 p-4 border-b border-stone-200 space-y-3 pt-[max(env(safe-area-inset-top),16px)] md:pt-4"
-          style={{ backgroundColor: '#ffffff', isolation: 'isolate' }}
+          className="safe-area-top-header relative z-20 p-4 border-b border-stone-200 space-y-3 md:pt-4"
+          style={{ 
+            paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 6px), 44px)',
+            backgroundColor: '#ffffff', 
+            isolation: 'isolate' 
+          }}
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-stone-900">Danh bạ khách hàng ({customers.length})</span>

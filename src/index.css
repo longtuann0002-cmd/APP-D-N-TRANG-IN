@@ -53,7 +53,7 @@
 
 /* Bulletproof Native Safe-Area Utilities */
 .safe-area-top-header {
-  padding-top: max(calc(env(safe-area-inset-top, 0px) + 14px), 54px) !important;
+  padding-top: max(calc(env(safe-area-inset-top, 0px) + 6px), 44px) !important;
   background-color: #ffffff !important;
   isolation: isolate !important;
   -webkit-backface-visibility: hidden !important;
