@@ -11,7 +11,8 @@ import {
   X,
   CreditCard,
   FileText,
-  Clock
+  Clock,
+  ArrowLeft
 } from 'lucide-react';
 
 interface CustomerCRMProps {
@@ -28,6 +29,7 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
   onCreateOrderForCustomer
 }) => {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>(customers[0]?.id || '');
+  const [showDetailOnMobile, setShowDetailOnMobile] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'regular' | 'debt'>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -78,13 +80,15 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
     <div className="flex-1 h-full flex bg-studio-bg overflow-hidden select-none">
       
       {/* Left Sidebar: Customer List */}
-      <div className="w-80 h-full bg-white border-r border-studio-border flex flex-col shrink-0">
-        <div className="p-4 border-b border-stone-100 space-y-3">
+      <div className={`w-full md:w-80 h-full bg-white border-r border-studio-border flex flex-col shrink-0 pb-28 md:pb-0 ${
+        showDetailOnMobile ? 'hidden md:flex' : 'flex'
+      }`}>
+        <div className="p-4 border-b border-stone-100 space-y-3 pt-[max(env(safe-area-inset-top),16px)] md:pt-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-stone-900">Danh bạ khách hàng ({customers.length})</span>
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-lg shadow-2xs transition"
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-lg shadow-2xs transition active:scale-98"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Thêm khách</span>
@@ -98,14 +102,14 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
               placeholder="Tên hoặc số điện thoại..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-xs placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-brand-500"
+              className="w-full pl-8 pr-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-brand-500"
             />
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
             <button
               onClick={() => setFilterType('all')}
-              className={`px-2.5 py-1 rounded text-[11px] font-semibold transition ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0 transition ${
                 filterType === 'all' ? 'bg-stone-900 text-white' : 'text-stone-600 hover:bg-stone-100'
               }`}
             >
@@ -113,7 +117,7 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
             </button>
             <button
               onClick={() => setFilterType('regular')}
-              className={`px-2.5 py-1 rounded text-[11px] font-semibold transition ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0 transition ${
                 filterType === 'regular' ? 'bg-stone-900 text-white' : 'text-stone-600 hover:bg-stone-100'
               }`}
             >
@@ -121,7 +125,7 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
             </button>
             <button
               onClick={() => setFilterType('debt')}
-              className={`px-2.5 py-1 rounded text-[11px] font-semibold transition ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0 transition ${
                 filterType === 'debt' ? 'bg-stone-900 text-white' : 'text-stone-600 hover:bg-stone-100'
               }`}
             >
@@ -142,9 +146,12 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
               return (
                 <div
                   key={cust.id}
-                  onClick={() => setSelectedCustomerId(cust.id)}
-                  className={`p-3.5 cursor-pointer transition flex items-center justify-between ${
-                    isSelected ? 'bg-stone-100/80 border-l-3 border-stone-900' : 'hover:bg-stone-50'
+                  onClick={() => {
+                    setSelectedCustomerId(cust.id);
+                    setShowDetailOnMobile(true);
+                  }}
+                  className={`p-3.5 cursor-pointer transition flex items-center justify-between active:bg-stone-200/50 ${
+                    isSelected ? 'bg-stone-100/90 border-l-4 border-stone-900' : 'hover:bg-stone-50'
                   }`}
                 >
                   <div className="min-w-0 pr-2">
@@ -166,18 +173,30 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
 
       {/* Right Column: Customer Details */}
       {selectedCustomer ? (
-        <div className="flex-1 h-full flex flex-col overflow-y-auto p-8">
+        <div className={`flex-1 w-full h-full flex-col overflow-y-auto p-4 md:p-8 pb-32 md:pb-8 pt-[max(env(safe-area-inset-top),16px)] md:pt-8 ${
+          showDetailOnMobile ? 'flex' : 'hidden md:flex'
+        }`}>
+          {/* Mobile Back Button */}
+          <div className="md:hidden mb-3">
+            <button
+              onClick={() => setShowDetailOnMobile(false)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-stone-200 rounded-xl text-xs font-bold text-stone-800 shadow-2xs hover:bg-stone-50 active:scale-98"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 text-stone-500" />
+              <span>Quay lại danh bạ</span>
+            </button>
+          </div>
           
           {/* Header Card */}
-          <div className="bg-white rounded-2xl p-6 border border-studio-border shadow-xs mb-6">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-white rounded-2xl p-4 md:p-6 border border-studio-border shadow-xs mb-4 md:mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center text-base font-bold text-stone-800">
+                <div className="w-12 h-12 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center text-base font-bold text-stone-800 shrink-0">
                   {selectedCustomer.name.charAt(0).toUpperCase()}
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-bold text-stone-900">{selectedCustomer.name}</h2>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-base md:text-lg font-bold text-stone-900 truncate">{selectedCustomer.name}</h2>
                     {selectedCustomer.totalOrders >= 2 ? (
                       <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">Khách quen</span>
                     ) : (
@@ -188,11 +207,12 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 self-end sm:self-auto">
                 <button
                   onClick={() => {
                     if (window.confirm(`Bạn có chắc chắn muốn xóa khách hàng "${selectedCustomer.name}"?\nThao tác này không thể hoàn tác.`)) {
                       onDeleteCustomer(selectedCustomer.id);
+                      setShowDetailOnMobile(false);
                     }
                   }}
                   className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
@@ -202,7 +222,7 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
                 </button>
                 <button
                   onClick={() => onCreateOrderForCustomer(selectedCustomer)}
-                  className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shadow-xs transition active:scale-98 flex items-center gap-1.5"
+                  className="px-3.5 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shadow-xs transition active:scale-98 flex items-center gap-1.5"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Tạo đơn cho khách</span>
@@ -211,7 +231,7 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
             </div>
 
             {/* Quick Contact Links */}
-            <div className="flex items-center gap-3 pt-3 border-t border-stone-100">
+            <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-stone-100">
               {selectedCustomer.phone && (
                 <a
                   href={`tel:${selectedCustomer.phone}`}
@@ -236,22 +256,22 @@ export const CustomerCRM: React.FC<CustomerCRMProps> = ({
           </div>
 
           {/* Stats 4 Cards */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-2xs">
-              <span className="text-xs text-stone-400 block mb-1">Số đơn đã đặt</span>
-              <span className="text-xl font-bold text-stone-900">{selectedCustomer.totalOrders} đơn</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
+            <div className="bg-white p-3.5 md:p-4 rounded-xl border border-stone-200 shadow-2xs">
+              <span className="text-[11px] md:text-xs text-stone-400 block mb-0.5">Số đơn đã đặt</span>
+              <span className="text-base md:text-xl font-bold text-stone-900">{selectedCustomer.totalOrders} đơn</span>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-2xs">
-              <span className="text-xs text-stone-400 block mb-1">Tổng tiền đặt</span>
-              <span className="text-xl font-bold text-stone-900">{selectedCustomer.totalAmount.toLocaleString('vi-VN')}đ</span>
+            <div className="bg-white p-3.5 md:p-4 rounded-xl border border-stone-200 shadow-2xs">
+              <span className="text-[11px] md:text-xs text-stone-400 block mb-0.5">Tổng tiền đặt</span>
+              <span className="text-base md:text-xl font-bold text-stone-900">{selectedCustomer.totalAmount.toLocaleString('vi-VN')}đ</span>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-2xs">
-              <span className="text-xs text-stone-400 block mb-1">Đã thu</span>
-              <span className="text-xl font-bold text-emerald-600">{selectedCustomer.paidAmount.toLocaleString('vi-VN')}đ</span>
+            <div className="bg-white p-3.5 md:p-4 rounded-xl border border-stone-200 shadow-2xs">
+              <span className="text-[11px] md:text-xs text-stone-400 block mb-0.5">Đã thu</span>
+              <span className="text-base md:text-xl font-bold text-emerald-600">{selectedCustomer.paidAmount.toLocaleString('vi-VN')}đ</span>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-2xs">
-              <span className="text-xs text-stone-400 block mb-1">Còn nợ</span>
-              <span className={`text-xl font-bold ${selectedCustomer.debtAmount > 0 ? 'text-red-600' : 'text-stone-800'}`}>
+            <div className="bg-white p-3.5 md:p-4 rounded-xl border border-stone-200 shadow-2xs">
+              <span className="text-[11px] md:text-xs text-stone-400 block mb-0.5">Còn nợ</span>
+              <span className={`text-base md:text-xl font-bold ${selectedCustomer.debtAmount > 0 ? 'text-red-600' : 'text-stone-800'}`}>
                 {selectedCustomer.debtAmount.toLocaleString('vi-VN')}đ
               </span>
             </div>

@@ -889,8 +889,8 @@ export function App() {
       {/* Main Work Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         
-        {/* Mobile Brand Header — visible only on mobile, hidden on desktop */}
-        {activeTab !== 'editor' && (
+        {/* Mobile Brand Header — visible only on mobile when on Orders dashboard */}
+        {activeTab === 'orders' && (
           <div className="flex md:hidden items-center justify-between px-4 pt-[max(env(safe-area-inset-top),12px)] pb-3 bg-white border-b border-stone-200/70">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-stone-900 via-stone-800 to-amber-600 flex items-center justify-center text-white font-extrabold text-sm shadow-sm">

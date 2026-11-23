@@ -60,6 +60,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
   const [layoutMode, setLayoutMode] = useState<'single' | 'multi'>('single');
   const [photoCount, setPhotoCount] = useState(6);
   const [allowRotation, setAllowRotation] = useState<boolean>(true);
+  const [mobileTab, setMobileTab] = useState<'form' | 'preview'>('form');
 
   // Chất liệu giấy & Cán màng
   const [paperFinish, setPaperFinish] = useState<PaperFinishType>('glossy');
@@ -478,33 +479,55 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-3 select-none">
-      <div className="bg-white rounded-3xl shadow-2xl border border-stone-200/90 w-full max-w-6xl h-[94vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-0 md:p-3 select-none">
+      <div className="bg-white rounded-none md:rounded-3xl shadow-2xl border-0 md:border border-stone-200/90 w-full max-w-6xl h-full md:h-[94vh] flex flex-col overflow-hidden animate-in fade-in duration-150">
         
-        {/* Header matching Screenshot */}
-        <div className="px-7 pt-5 pb-2 flex items-center justify-between shrink-0">
+        {/* Header */}
+        <div className="px-4 md:px-7 pt-3 md:pt-5 pb-2 flex items-center justify-between shrink-0 border-b border-stone-100 md:border-b-0">
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-extrabold text-stone-900 tracking-tight">Tạo đơn mới</h2>
+            <h2 className="text-lg md:text-xl font-extrabold text-stone-900 tracking-tight">Tạo đơn mới</h2>
             {initialCustomer && (
               <span className="text-xs bg-amber-50 text-amber-800 font-semibold px-2.5 py-1 rounded-full border border-amber-200 flex items-center gap-1.5">
                 <span>👤</span>
-                <span>Khách hàng: <strong>{initialCustomer.name}</strong></span>
+                <span className="truncate max-w-[140px]">Khách: <strong>{initialCustomer.name}</strong></span>
               </span>
             )}
           </div>
           <button 
             onClick={onClose}
-            className="p-1 text-stone-400 hover:text-stone-700 transition"
+            className="p-1.5 text-stone-400 hover:text-stone-700 transition"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Modal Body: 2 Columns */}
-        <div className="flex-1 flex overflow-hidden px-7 py-3 gap-6 min-h-0">
+        {/* Mobile Tab Switcher: Cấu hình vs Xem trước */}
+        <div className="md:hidden flex items-center bg-stone-100 p-1 mx-4 mt-2 rounded-xl shrink-0">
+          <button
+            type="button"
+            onClick={() => setMobileTab('form')}
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition text-center ${
+              mobileTab === 'form' ? 'bg-white shadow-xs text-stone-900' : 'text-stone-500'
+            }`}
+          >
+            ⚙️ Cấu hình ({currentPresetName})
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileTab('preview')}
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition text-center ${
+              mobileTab === 'preview' ? 'bg-white shadow-xs text-stone-900' : 'text-stone-500'
+            }`}
+          >
+            👁️ Xem trước ({slotsPerPage} ô/tờ)
+          </button>
+        </div>
+
+        {/* Modal Body: 2 Columns on desktop, Tabbed on mobile */}
+        <div className="flex-1 flex overflow-hidden px-4 md:px-7 py-3 gap-6 min-h-0 flex-col md:flex-row">
           
           {/* Left Column: 4 Steps */}
-          <div className="w-1/2 overflow-y-auto space-y-5 pr-3">
+          <div className={`${mobileTab === 'form' ? 'block' : 'hidden'} md:block w-full md:w-1/2 overflow-y-auto space-y-5 pr-0 md:pr-3`}>
             
             {/* Step 1: Khổ giấy */}
             <div>
@@ -1301,7 +1324,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
           </div>
 
           {/* Right Column: "Xem trước" Panel */}
-          <div className="w-1/2 bg-[#ededec] rounded-3xl p-5 flex flex-col shrink-0 min-h-0">
+          <div className={`${mobileTab === 'preview' ? 'flex' : 'hidden'} md:flex w-full md:w-1/2 bg-[#ededec] rounded-3xl p-4 md:p-5 flex-col shrink-0 min-h-0 overflow-y-auto`}>
 
             {/* Header: Xem trước + Pagination */}
             <div className="flex items-center justify-between mb-2 shrink-0">
@@ -1540,35 +1563,35 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
 
         </div>
 
-        {/* Modal Footer matching Screenshot */}
-        <div className="px-7 py-4 border-t border-stone-100 flex items-center justify-between">
+        {/* Modal Footer */}
+        <div className="px-4 md:px-7 py-3 md:py-4 pb-[max(env(safe-area-inset-bottom),12px)] border-t border-stone-100 flex items-center justify-between shrink-0 bg-white">
           <div className="flex items-center gap-2">
             <button 
               type="button"
               className="text-stone-400 hover:text-stone-600 transition"
               title="Trợ giúp"
             >
-              <HelpCircle className="w-5 h-5" />
+              <HelpCircle className="w-4 h-4 md:w-5 md:h-5" />
             </button>
-            <div className="hidden sm:block text-xs">
-              <span className="text-stone-400 font-medium">Tạm tính ({orderQty} ảnh): </span>
+            <div className="text-xs">
+              <span className="hidden sm:inline text-stone-400 font-medium">Tạm tính ({orderQty} ảnh): </span>
               <span className="text-stone-900 font-black">{currentPricing.totalPrice.toLocaleString('vi-VN')} đ</span>
-              <span className="text-stone-400 font-mono text-[11px] ml-1.5">({currentPricing.unitPrice.toLocaleString('vi-VN')} đ/ảnh)</span>
+              <span className="hidden sm:inline text-stone-400 font-mono text-[11px] ml-1.5">({currentPricing.unitPrice.toLocaleString('vi-VN')} đ/ảnh)</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 text-xs font-bold text-stone-700 hover:text-stone-900 transition"
+              className="px-3.5 md:px-5 py-2 text-xs font-bold text-stone-700 hover:text-stone-900 transition"
             >
               Hủy
             </button>
             <button
               type="button"
               onClick={handleCreate}
-              className="px-6 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs rounded-full shadow-md transition active:scale-95"
+              className="px-5 md:px-6 py-2 md:py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs rounded-full shadow-md transition active:scale-95 shrink-0"
             >
               Tạo đơn
             </button>

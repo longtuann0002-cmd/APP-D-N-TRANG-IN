@@ -249,7 +249,7 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
   );
 
   return (
-    <div className="flex-1 h-full bg-studio-bg overflow-y-auto p-6 md:p-8 select-none">
+    <div className="flex-1 h-full bg-studio-bg overflow-y-auto p-4 md:p-8 pb-32 md:pb-8 pt-[max(env(safe-area-inset-top),16px)] md:pt-8 select-none">
       <div className="max-w-6xl mx-auto">
         
         {/* Header */}
@@ -350,7 +350,8 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
             </span>
           </div>
 
-          <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left text-xs min-w-[700px]">
             <thead className="bg-stone-50/90 border-b border-stone-100 text-stone-500 uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="py-3 px-5 font-bold">Mẫu in / Dịch vụ</th>
@@ -646,6 +647,7 @@ export const PricingManager: React.FC<PricingManagerProps> = ({
               )}
             </tbody>
           </table>
+          </div>
         </div>
 
       </div>

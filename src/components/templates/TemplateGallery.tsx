@@ -194,19 +194,19 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
 
   return (
     <div className="flex-1 h-full flex flex-col bg-studio-bg overflow-hidden select-none">
-      {/* Header */}
-      <div className="h-16 bg-white border-b border-studio-border px-8 flex items-center justify-between shrink-0">
+      {/* Header — Responsive for Mobile & Desktop */}
+      <div className="bg-white border-b border-studio-border px-4 md:px-8 py-3 pt-[max(env(safe-area-inset-top),12px)] md:h-16 flex flex-col md:flex-row md:items-center justify-between shrink-0 gap-3">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">Kho mẫu</span>
-            <h1 className="text-xl font-bold text-stone-900 tracking-tight">Chọn mẫu, tạo đơn ngay</h1>
+            <h1 className="text-lg md:text-xl font-bold text-stone-900 tracking-tight">Chọn mẫu, tạo đơn ngay</h1>
           </div>
-          <p className="text-xs text-stone-500 mt-0.5">Tùy chỉnh độ dày viền mm, hoa văn Giáng sinh và liên kết bảng giá</p>
+          <p className="text-[11px] md:text-xs text-stone-500 mt-0.5">Tùy chỉnh độ dày viền mm, hoa văn Giáng sinh và liên kết bảng giá</p>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Filter pills */}
-          <div className="flex items-center gap-1.5 bg-stone-100 p-1 rounded-xl">
+        <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+          {/* Filter pills — scrollable on mobile */}
+          <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl overflow-x-auto no-scrollbar max-w-full">
             {[
               { id: 'all', label: 'Tất cả (' + templates.length + ')' },
               { id: 'polaroid', label: 'Polaroid' },
@@ -217,7 +217,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
               <button
                 key={tab.id}
                 onClick={() => setSelectedCategory(tab.id as any)}
-                className={'px-3 py-1.5 text-xs font-semibold rounded-lg transition ' + (
+                className={'px-2.5 py-1 text-xs font-semibold rounded-lg transition shrink-0 ' + (
                   selectedCategory === tab.id
                     ? 'bg-stone-900 text-white shadow-xs'
                     : 'text-stone-600 hover:text-stone-900'
@@ -228,33 +228,35 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
             ))}
           </div>
 
-          {/* Button: Chọn nhiều để xóa */}
-          {!isSelectMode ? (
-            <button
-              onClick={() => setIsSelectMode(true)}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-bold rounded-xl transition active:scale-95"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>Chọn & Xóa</span>
-            </button>
-          ) : (
-            <button
-              onClick={handleExitSelectMode}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition"
-            >
-              <X className="w-3.5 h-3.5" />
-              <span>Hủy chọn</span>
-            </button>
-          )}
+          <div className="flex items-center gap-2 ml-auto md:ml-0">
+            {/* Button: Chọn nhiều để xóa */}
+            {!isSelectMode ? (
+              <button
+                onClick={() => setIsSelectMode(true)}
+                className="flex items-center gap-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-bold rounded-xl transition active:scale-95"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Chọn & Xóa</span>
+              </button>
+            ) : (
+              <button
+                onClick={handleExitSelectMode}
+                className="flex items-center gap-1 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Hủy</span>
+              </button>
+            )}
 
-          {/* Button: + Tạo mẫu mới */}
-          <button
-            onClick={handleOpenCreateModal}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shadow-xs transition active:scale-95"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Tạo mẫu mới</span>
-          </button>
+            {/* Button: + Tạo mẫu mới */}
+            <button
+              onClick={handleOpenCreateModal}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shadow-xs transition active:scale-95 shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Tạo mẫu mới</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -291,8 +293,8 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
       <div className="flex-1 flex overflow-hidden">
         
         {/* Left: Templates Cards Grid */}
-        <div className="flex-1 p-8 overflow-y-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="flex-1 p-3 md:p-8 overflow-y-auto pb-28 md:pb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
             {filteredTemplates.map(template => {
               const isSelected = !isSelectMode && selectedTemplate?.id === template.id;
               const isChecked = isSelectMode && selectedIds.has(template.id);
@@ -558,9 +560,9 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
           </div>
         </div>
 
-        {/* Right: Selected Template Inspector */}
+        {/* Right: Selected Template Inspector (Desktop only) */}
         {selectedTemplate && (
-          <div className="w-80 bg-white border-l border-studio-border p-6 flex flex-col justify-between shrink-0">
+          <div className="hidden md:flex w-80 bg-white border-l border-studio-border p-6 flex-col justify-between shrink-0">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">Mẫu đã chọn</span>
@@ -815,6 +817,26 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
         )}
 
       </div>
+
+      {/* Mobile Floating Action Card when a template is selected */}
+      {selectedTemplate && (
+        <div className="md:hidden fixed bottom-16 left-3 right-3 z-40 bg-stone-950/95 backdrop-blur-xl border border-white/20 p-3 rounded-2xl shadow-2xl text-white flex items-center justify-between gap-3 animate-in slide-in-from-bottom duration-200">
+          <div className="min-w-0 flex-1">
+            <span className="text-[10px] text-amber-300 font-extrabold uppercase tracking-wider block">Mẫu đang chọn</span>
+            <span className="font-bold text-xs truncate block text-white">{selectedTemplate.name}</span>
+            <span className="text-[10px] text-stone-300 block">
+              {selectedTemplate.photoSize.widthMm}×{selectedTemplate.photoSize.heightMm} mm • {selectedTemplate.customPrice?.toLocaleString('vi-VN') || '2.000'}đ/ảnh
+            </span>
+          </div>
+          <button
+            onClick={handleApplyTemplate}
+            className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 font-black text-xs rounded-xl shadow-md active:scale-95 transition shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Tạo đơn</span>
+          </button>
+        </div>
+      )}
 
       {/* Template Editor Modal */}
       {isEditorModalOpen && (
