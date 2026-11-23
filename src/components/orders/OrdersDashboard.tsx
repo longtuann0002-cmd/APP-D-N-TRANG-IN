@@ -83,8 +83,8 @@ export const OrdersDashboard: React.FC<OrdersDashboardProps> = ({
         );
       case 'in_progress':
         return (
-          <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-200/80 text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-2xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+          <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-800 border border-orange-200/80 text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-2xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
             Đang xử lý
           </span>
         );
@@ -115,12 +115,12 @@ export const OrdersDashboard: React.FC<OrdersDashboardProps> = ({
     return (
       <div className="flex-1 h-full flex flex-col items-center justify-center p-8 bg-gradient-to-b from-stone-50 via-white to-stone-50 select-none">
         <div className="max-w-md text-center animate-in fade-in zoom-in-95 duration-300">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-stone-900 via-stone-800 to-amber-600 text-white flex items-center justify-center mx-auto mb-5 shadow-xl shadow-stone-900/20 border-2 border-white">
+          <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-stone-900 via-stone-800 to-orange-500 text-white flex items-center justify-center mx-auto mb-5 shadow-xl shadow-stone-900/20 border-2 border-white">
             <span className="text-2xl font-black tracking-tight">C</span>
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/60 text-amber-800 text-xs font-semibold mb-3">
-            <Sparkles className="w-3 h-3 text-amber-600" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 border border-orange-200/60 text-orange-800 text-xs font-semibold mb-3">
+            <Sparkles className="w-3 h-3 text-orange-600" />
             <span>Studio Dàn Trang & In Ấn Chuyên Nghiệp</span>
           </div>
 
@@ -149,7 +149,7 @@ export const OrdersDashboard: React.FC<OrdersDashboardProps> = ({
 
           <button
             onClick={onOpenNewOrder}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-stone-900 via-stone-800 to-amber-600 hover:from-black hover:to-amber-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-stone-900/15 transition-all duration-200 active:scale-95"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-stone-900 via-stone-800 to-orange-500 hover:from-black hover:to-orange-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-stone-900/15 transition-all duration-200 active:scale-95"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Tạo đơn in đầu tiên ngay</span>
@@ -170,7 +170,7 @@ export const OrdersDashboard: React.FC<OrdersDashboardProps> = ({
               <span className="text-lg md:text-2xl font-black text-stone-900 tracking-tight">
                 Danh sách đơn hàng
               </span>
-              <span className="text-xs font-bold bg-stone-900 text-amber-300 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-bold bg-stone-900 text-orange-400 px-2 py-0.5 rounded-full">
                 {filtered.length} đơn
               </span>
             </div>
@@ -182,7 +182,7 @@ export const OrdersDashboard: React.FC<OrdersDashboardProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onOpenNewOrder}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-stone-900 via-stone-800 to-amber-600 hover:from-black hover:to-amber-500 text-white text-xs font-bold rounded-xl shadow-md shadow-stone-900/15 transition-all duration-200 active:scale-95 shrink-0"
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-stone-900 via-stone-800 to-orange-500 hover:from-black hover:to-orange-600 text-white text-xs font-bold rounded-xl shadow-md shadow-stone-900/15 transition-all duration-200 active:scale-95 shrink-0"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>Tạo đơn mới</span>
@@ -195,9 +195,9 @@ export const OrdersDashboard: React.FC<OrdersDashboardProps> = ({
           <div className="bg-white rounded-xl border border-stone-200/80 p-3.5 shadow-2xs flex items-center justify-between">
             <div>
               <span className="text-[11px] font-semibold text-stone-400 block">Đang sản xuất</span>
-              <span className="text-xl font-black text-amber-600">{stats.in_progress}</span>
+              <span className="text-xl font-black text-orange-600">{stats.in_progress}</span>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">
+            <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-xs">
               <Clock className="w-4 h-4" />
             </div>
           </div>
@@ -334,7 +334,7 @@ export const OrdersDashboard: React.FC<OrdersDashboardProps> = ({
                               }}
                               className={`flex items-center gap-0.5 transition-colors ${
                                 isCurrent 
-                                  ? 'font-bold text-amber-700' 
+                                  ? 'font-bold text-orange-600' 
                                   : isPassed 
                                     ? 'font-medium text-stone-700' 
                                     : 'text-stone-300 hover:text-stone-500'
@@ -349,7 +349,7 @@ export const OrdersDashboard: React.FC<OrdersDashboardProps> = ({
                       {/* Line Bar with Dots */}
                       <div className="h-1.5 w-full bg-stone-100 rounded-full overflow-hidden flex relative">
                         <div 
-                          className="h-full bg-gradient-to-r from-stone-900 to-amber-500 transition-all duration-300 rounded-full"
+                          className="h-full bg-gradient-to-r from-stone-900 to-orange-500 transition-all duration-300 rounded-full"
                           style={{ width: `${((currentStep + 1) / 4) * 100}%` }}
                         />
                       </div>

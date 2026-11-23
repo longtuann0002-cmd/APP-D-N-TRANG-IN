@@ -145,7 +145,7 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
   const getStatusColor = (status: OrderStatus) => {
     switch (status) {
       case 'in_progress':
-        return 'bg-amber-100 text-amber-800 border-amber-200';
+        return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'new':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'printed':
@@ -169,8 +169,9 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
 
   return (
     <header 
-      className="relative border-b border-stone-200 px-3 flex items-center justify-between shrink-0 select-none z-30 pt-[max(env(safe-area-inset-top),14px)] pb-2.5 md:py-0 md:h-12 shadow-2xs"
+      className="safe-area-top-header relative border-b border-stone-200 px-3 flex items-center justify-between shrink-0 select-none z-30 pb-2.5 md:py-0 md:h-12 shadow-2xs"
       style={{ 
+        paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 14px), 54px)',
         backgroundColor: '#ffffff',
         isolation: 'isolate',
         WebkitBackfaceVisibility: 'hidden',

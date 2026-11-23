@@ -203,8 +203,9 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
     <div className="flex-1 h-full flex flex-col bg-studio-bg overflow-hidden select-none">
       {/* Header — Responsive for Mobile & Desktop */}
       <div 
-        className="relative z-20 border-b border-studio-border px-4 md:px-8 py-3 pt-[max(env(safe-area-inset-top),16px)] md:h-16 flex flex-col md:flex-row md:items-center justify-between shrink-0 gap-3 shadow-2xs"
+        className="safe-area-top-header relative z-20 border-b border-studio-border px-4 md:px-8 py-3 md:h-16 flex flex-col md:flex-row md:items-center justify-between shrink-0 gap-3 shadow-2xs"
         style={{ 
+          paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 14px), 54px)',
           backgroundColor: '#ffffff',
           isolation: 'isolate',
           WebkitBackfaceVisibility: 'hidden',
@@ -837,7 +838,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
       {selectedTemplate && (
         <div className="md:hidden fixed bottom-[calc(max(env(safe-area-inset-bottom),26px)+64px)] left-3 right-3 z-30 bg-stone-950/95 backdrop-blur-xl border border-white/20 p-3 rounded-2xl shadow-2xl text-white flex items-center justify-between gap-3 animate-in slide-in-from-bottom duration-200">
           <div className="min-w-0 flex-1">
-            <span className="text-[10px] text-amber-300 font-extrabold uppercase tracking-wider block">Mẫu đang chọn</span>
+            <span className="text-[10px] text-orange-400 font-extrabold uppercase tracking-wider block">Mẫu đang chọn</span>
             <span className="font-bold text-xs truncate block text-white">{selectedTemplate.name}</span>
             <span className="text-[10px] text-stone-300 block">
               {selectedTemplate.photoSize.widthMm}×{selectedTemplate.photoSize.heightMm} mm • {selectedTemplate.customPrice?.toLocaleString('vi-VN') || '2.000'}đ/ảnh
@@ -845,7 +846,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
           </div>
           <button
             onClick={handleApplyTemplate}
-            className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 font-black text-xs rounded-xl shadow-md active:scale-95 transition shrink-0"
+            className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-400 text-white font-black text-xs rounded-xl shadow-md active:scale-95 transition shrink-0"
           >
             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>Tạo đơn</span>

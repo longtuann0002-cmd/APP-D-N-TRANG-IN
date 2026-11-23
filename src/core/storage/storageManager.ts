@@ -315,6 +315,27 @@ export const storageManager = {
     } catch {
       return [];
     }
+  },
+
+  // --- SHOP INFO / LOGO ---
+  getShopInfo(): { name: string; tagline: string; logoUrl?: string } {
+    try {
+      const data = localStorage.getItem('caos_studio_shop_info');
+      if (data) {
+        return JSON.parse(data);
+      }
+    } catch {}
+    return {
+      name: 'Caos',
+      tagline: 'Print',
+      logoUrl: ''
+    };
+  },
+
+  saveShopInfo(info: { name: string; tagline: string; logoUrl?: string }): void {
+    try {
+      localStorage.setItem('caos_studio_shop_info', JSON.stringify(info));
+    } catch {}
   }
 };
 

@@ -51,6 +51,23 @@
   background: rgba(0, 0, 0, 0.25);
 }
 
+/* Bulletproof Native Safe-Area Utilities */
+.safe-area-top-header {
+  padding-top: max(calc(env(safe-area-inset-top, 0px) + 14px), 54px) !important;
+  background-color: #ffffff !important;
+  isolation: isolate !important;
+  -webkit-backface-visibility: hidden !important;
+  transform: translateZ(0) !important;
+}
+
+.safe-area-bottom-bar {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 28px) !important;
+  background-color: #141210 !important;
+  isolation: isolate !important;
+  -webkit-backface-visibility: hidden !important;
+  transform: translateZ(0) !important;
+}
+
 /* Print simulation canvas rules */
 .canvas-grid-pattern {
   background-size: 20px 20px;

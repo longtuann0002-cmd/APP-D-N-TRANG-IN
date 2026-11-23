@@ -24,6 +24,8 @@ interface SidebarProps {
   onOpenCalibration: () => void;
   onOpenAuth: () => void;
   isSupabaseConnected: boolean;
+  shopInfo?: { name: string; tagline: string; logoUrl?: string };
+  onOpenEditLogo?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -34,7 +36,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onToggleCollapse,
   onOpenCalibration,
   onOpenAuth,
-  isSupabaseConnected
+  isSupabaseConnected,
+  shopInfo,
+  onOpenEditLogo
 }) => {
   const menuItems = [
     { id: 'orders' as ActiveTab, label: 'Đơn hàng', icon: Layers, badge: orderCount > 0 ? orderCount : undefined },
@@ -53,14 +57,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Top Logo */}
       <div>
         <div className="h-14 flex items-center px-4 border-b border-studio-border/60">
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => onSelectTab('orders')}>
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-stone-900 via-stone-800 to-amber-600 flex items-center justify-center text-white font-extrabold shadow-sm shadow-stone-900/30">
-              <span className="text-base tracking-tighter">C</span>
+          <div 
+            className="flex items-center gap-2.5 cursor-pointer group" 
+            onClick={onOpenEditLogo || (() => onSelectTab('orders'))}
+            title="Nhấn để đổi logo & tên tiệm"
+          >
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-stone-900 via-stone-800 to-orange-500 flex items-center justify-center text-white font-extrabold shadow-sm shadow-stone-900/30 overflow-hidden shrink-0">
+              {shopInfo?.logoUrl ? (
+                <img src={shopInfo.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-base tracking-tighter">{shopInfo?.name?.charAt(0).toUpperCase() || 'C'}</span>
+              )}
             </div>
             {!collapsed && (
               <div className="flex items-center gap-1.5">
-                <span className="font-bold text-lg text-stone-900 tracking-tight">Caos</span>
-                <span className="text-[10px] bg-stone-900 text-amber-300 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Print</span>
+                <span className="font-bold text-lg text-stone-900 tracking-tight">{shopInfo?.name || 'Caos'}</span>
+                <span className="text-[10px] bg-stone-900 text-orange-400 px-1.5 py-0.5 rounded font-black uppercase tracking-wider">
+                  {shopInfo?.tagline || 'Print'}
+                </span>
+                <span className="text-stone-300 group-hover:text-stone-700 text-xs">✏️</span>
               </div>
             )}
           </div>

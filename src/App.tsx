@@ -39,6 +39,7 @@ import { ExportModal } from './components/export/ExportModal';
 import { PhotoCropAdjustModal } from './components/media/PhotoCropAdjustModal';
 import { PhotoFilterModal } from './components/media/PhotoFilterModal';
 import { CaosDynamicCapsule } from './components/layout/CaosDynamicCapsule';
+import { EditLogoModal } from './components/brand/EditLogoModal';
 
 export function App() {
   // Navigation (mặc định vào giao diện chính Đơn hàng khi mở app hoặc F5)
@@ -133,11 +134,16 @@ export function App() {
   const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
 
+  // Shop Info & Logo Customization
+  const [shopInfo, setShopInfo] = useState(() => storageManager.getShopInfo());
+  const [isEditLogoModalOpen, setIsEditLogoModalOpen] = useState(false);
+
   // Check if any modal or bottom sheet is open (used to hide bottom navigation)
   const isAnyModalOpen = isNewOrderModalOpen ||
     isCalibrationModalOpen ||
     isAuthModalOpen ||
     isExportModalOpen ||
+    isEditLogoModalOpen ||
     !!cropModalPhoto ||
     !!filterModalPhoto ||
     isMobilePhotosOpen ||
@@ -917,6 +923,8 @@ export function App() {
         onOpenCalibration={() => setIsCalibrationModalOpen(true)}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         isSupabaseConnected={supabaseConnected}
+        shopInfo={shopInfo}
+        onOpenEditLogo={() => setIsEditLogoModalOpen(true)}
       />
 
       {/* Main Work Area */}
@@ -925,20 +933,34 @@ export function App() {
         {/* Mobile Brand Header — visible only on mobile when on Orders dashboard */}
         {activeTab === 'orders' && (
           <div 
-            className="relative z-30 flex md:hidden items-center justify-between px-4 pt-[max(env(safe-area-inset-top),16px)] pb-3 border-b border-stone-200 shrink-0 shadow-2xs"
+            className="safe-area-top-header relative z-30 flex md:hidden items-center justify-between px-4 pb-3 border-b border-stone-200 shrink-0 shadow-2xs"
             style={{ 
+              paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 14px), 54px)',
               backgroundColor: '#ffffff', 
               isolation: 'isolate', 
               WebkitBackfaceVisibility: 'hidden', 
               transform: 'translateZ(0)' 
             }}
           >
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-stone-900 via-stone-800 to-amber-600 flex items-center justify-center text-white font-extrabold text-sm shadow-sm">
-                C
+            <div 
+              onClick={() => setIsEditLogoModalOpen(true)}
+              className="flex items-center gap-2 cursor-pointer active:scale-95 transition group"
+              title="Nhấn để đổi logo & tên tiệm"
+            >
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-stone-900 via-stone-800 to-orange-500 flex items-center justify-center text-white font-extrabold text-sm shadow-sm overflow-hidden shrink-0 border border-stone-800">
+                {shopInfo.logoUrl ? (
+                  <img src={shopInfo.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <span>{shopInfo.name.charAt(0).toUpperCase() || 'C'}</span>
+                )}
               </div>
-              <span className="font-extrabold text-stone-950 text-base tracking-tight">Caos</span>
-              <span className="text-[9px] bg-stone-900 text-amber-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ml-0.5">Print</span>
+              <div className="flex items-center gap-1">
+                <span className="font-extrabold text-stone-950 text-base tracking-tight">{shopInfo.name || 'Caos'}</span>
+                <span className="text-[9px] bg-stone-900 text-orange-400 px-1.5 py-0.5 rounded font-black uppercase tracking-wider ml-0.5">
+                  {shopInfo.tagline || 'Print'}
+                </span>
+                <span className="text-stone-300 group-hover:text-stone-700 text-xs ml-0.5">✏️</span>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <input
@@ -946,7 +968,7 @@ export function App() {
                 placeholder="Tìm đơn..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-32 pl-3 pr-2 py-1.5 bg-stone-100 border border-stone-300 rounded-full text-xs text-stone-900 font-medium placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-900/20 focus:bg-white transition"
+                className="w-32 pl-3 pr-2 py-1.5 bg-stone-100 border border-stone-300 rounded-full text-xs text-stone-900 font-medium placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:bg-white transition"
               />
               <button
                 onClick={() => setIsAuthModalOpen(true)}
@@ -1472,6 +1494,17 @@ export function App() {
           onSave={handleSavePhotoFilter}
         />
       )}
+
+      {/* Custom Shop Logo & Name Modal */}
+      <EditLogoModal
+        isOpen={isEditLogoModalOpen}
+        onClose={() => setIsEditLogoModalOpen(false)}
+        shopInfo={shopInfo}
+        onSave={(newInfo) => {
+          setShopInfo(newInfo);
+          storageManager.saveShopInfo(newInfo);
+        }}
+      />
 
     </div>
   );

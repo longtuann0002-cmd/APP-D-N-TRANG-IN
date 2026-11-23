@@ -473,7 +473,7 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
       {selectedSlotId && (
         <div className="absolute top-2 md:top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 md:gap-2 bg-stone-900/95 text-white px-2.5 md:px-3.5 py-1.5 rounded-2xl shadow-2xl text-xs backdrop-blur-md max-w-[94vw] overflow-x-auto no-scrollbar border border-white/10 animate-in fade-in duration-150">
           <span className="shrink-0 whitespace-nowrap">
-            Ô: <strong className="text-amber-400">
+            Ô: <strong className="text-orange-400">
               {subSlotIndex !== null ? `Ảnh #${subSlotIndex + 1}` : (selectedSlot?.slot?.presetName || selectedSlot?.slot?.label || 'Khung in')}
             </strong>
             {subSlotIndex !== null && (selectedSlot?.slot?.presetName || selectedSlot?.slot?.label) && (
@@ -531,7 +531,7 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
                   className="flex items-center gap-1 px-2 py-0.5 bg-stone-800 hover:bg-stone-700 rounded-lg transition text-[11px]"
                   title="Chỉnh màu ảnh"
                 >
-                  <Sparkles className="w-3 h-3 text-amber-400" />
+                  <Sparkles className="w-3 h-3 text-orange-400" />
                   <span>Chỉnh màu</span>
                 </button>
               )}
@@ -554,7 +554,7 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
                 <button
                   type="button"
                   onClick={onOpenMobilePhotos}
-                  className="flex items-center gap-1 px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-lg text-[11px] shadow-xs active:scale-95 transition"
+                  className="flex items-center gap-1 px-2.5 py-1 bg-orange-500 hover:bg-orange-400 text-white font-bold rounded-lg text-[11px] shadow-xs active:scale-95 transition"
                 >
                   <Plus className="w-3 h-3 stroke-[3]" />
                   <span>Chọn ảnh</span>

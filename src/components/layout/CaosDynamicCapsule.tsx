@@ -55,8 +55,11 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
     return (
       <nav
         aria-label="Editor Mobile Action Bar"
-        className="fixed bottom-0 left-0 right-0 z-40 md:hidden border-t border-stone-800 text-white pt-2.5 pb-[max(env(safe-area-inset-bottom),26px)] px-3 select-none shadow-[0_-12px_40px_rgba(0,0,0,0.65)]"
-        style={{ backgroundColor: '#141210' }}
+        className="safe-area-bottom-bar fixed bottom-0 left-0 right-0 z-40 md:hidden border-t border-stone-800 text-white pt-2.5 px-3 select-none shadow-[0_-12px_40px_rgba(0,0,0,0.65)]"
+        style={{ 
+          backgroundColor: '#141210',
+          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 28px)'
+        }}
       >
         <div className="flex items-center justify-between gap-1 max-w-md mx-auto">
           {/* Back to Orders */}
@@ -78,9 +81,9 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
             title="Mở kho ảnh"
           >
             <div className="relative">
-              <ImageIcon className="w-5 h-5 mb-0.5 text-amber-400" />
+              <ImageIcon className="w-5 h-5 mb-0.5 text-orange-400" />
               {photosCount > 0 && (
-                <span className="absolute -top-1 -right-2 bg-amber-500 text-stone-950 text-[9px] font-black px-1.5 py-0.2 rounded-full leading-tight">
+                <span className="absolute -top-1 -right-2 bg-orange-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full leading-tight">
                   {photosCount}
                 </span>
               )}
@@ -105,10 +108,10 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
           <button
             type="button"
             onClick={onQuickAutoLayout}
-            className="flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl text-amber-400 hover:text-amber-300 active:scale-95 transition min-h-[44px]"
+            className="flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl text-orange-400 hover:text-orange-300 active:scale-95 transition min-h-[44px]"
             title="Tự động sắp xếp ảnh tối ưu"
           >
-            <Sparkles className="w-5 h-5 mb-0.5 text-amber-400 animate-pulse" />
+            <Sparkles className="w-5 h-5 mb-0.5 text-orange-400 animate-pulse" />
             <span className="text-[10px] font-bold">Auto</span>
           </button>
 
@@ -116,7 +119,7 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
           <button
             type="button"
             onClick={onOpenExportModal}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-tr from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-black text-xs rounded-xl shadow-md shadow-amber-500/30 active:scale-95 transition shrink-0 min-h-[44px]"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-tr from-orange-500 to-orange-400 hover:from-orange-400 hover:to-orange-300 text-white font-black text-xs rounded-xl shadow-md shadow-orange-500/30 active:scale-95 transition shrink-0 min-h-[44px]"
             title="Xuất file in PDF hoặc JPG"
           >
             <FolderDown className="w-4 h-4 stroke-[2.5]" />
@@ -133,8 +136,11 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
   return (
     <nav
       aria-label="Main Mobile Navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 md:hidden border-t border-stone-800 text-white pt-2.5 pb-[max(env(safe-area-inset-bottom),26px)] px-3 select-none shadow-[0_-12px_40px_rgba(0,0,0,0.65)]"
-      style={{ backgroundColor: '#141210' }}
+      className="safe-area-bottom-bar fixed bottom-0 left-0 right-0 z-40 md:hidden border-t border-stone-800 text-white pt-2.5 px-3 select-none shadow-[0_-12px_40px_rgba(0,0,0,0.65)]"
+      style={{ 
+        backgroundColor: '#141210',
+        paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 28px)'
+      }}
     >
       <div className="flex items-center justify-between max-w-md mx-auto">
         {/* Tab 1: Đơn hàng */}
@@ -142,13 +148,13 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
           type="button"
           onClick={() => onSelectTab('orders')}
           className={`flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition active:scale-95 min-h-[44px] ${
-            activeTab === 'orders' ? 'text-amber-400 font-bold' : 'text-stone-400 hover:text-stone-200'
+            activeTab === 'orders' ? 'text-orange-400 font-bold' : 'text-stone-400 hover:text-stone-200'
           }`}
         >
           <div className="relative">
-            <Layers className={`w-5 h-5 mb-0.5 ${activeTab === 'orders' ? 'text-amber-400 stroke-[2.5]' : 'text-stone-400'}`} />
+            <Layers className={`w-5 h-5 mb-0.5 ${activeTab === 'orders' ? 'text-orange-400 stroke-[2.5]' : 'text-stone-400'}`} />
             {orderCount > 0 && (
-              <span className="absolute -top-1 -right-2 bg-amber-500 text-stone-950 text-[9px] font-black px-1.5 rounded-full leading-tight">
+              <span className="absolute -top-1 -right-2 bg-orange-500 text-white text-[9px] font-black px-1.5 rounded-full leading-tight">
                 {orderCount}
               </span>
             )}
@@ -161,10 +167,10 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
           type="button"
           onClick={() => onSelectTab('templates')}
           className={`flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition active:scale-95 min-h-[44px] ${
-            activeTab === 'templates' ? 'text-amber-400 font-bold' : 'text-stone-400 hover:text-stone-200'
+            activeTab === 'templates' ? 'text-orange-400 font-bold' : 'text-stone-400 hover:text-stone-200'
           }`}
         >
-          <LayoutTemplate className={`w-5 h-5 mb-0.5 ${activeTab === 'templates' ? 'text-amber-400 stroke-[2.5]' : 'text-stone-400'}`} />
+          <LayoutTemplate className={`w-5 h-5 mb-0.5 ${activeTab === 'templates' ? 'text-orange-400 stroke-[2.5]' : 'text-stone-400'}`} />
           <span className="text-[10px]">Kho mẫu</span>
         </button>
 
@@ -173,12 +179,12 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
           <button
             type="button"
             onClick={onOpenNewOrder}
-            className="w-12 h-12 -mt-5 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-400 text-stone-950 flex flex-col items-center justify-center shadow-lg shadow-amber-500/40 border-2 border-stone-950 active:scale-90 transition-transform"
+            className="w-12 h-12 -mt-5 rounded-2xl bg-gradient-to-tr from-orange-500 to-orange-400 text-white flex flex-col items-center justify-center shadow-lg shadow-orange-500/40 border-2 border-stone-950 active:scale-90 transition-transform"
             title="Tạo đơn in mới"
           >
             <Plus className="w-6 h-6 stroke-[3]" />
           </button>
-          <span className="block text-center text-[9px] font-bold text-amber-400 mt-0.5">Tạo đơn</span>
+          <span className="block text-center text-[9px] font-bold text-orange-400 mt-0.5">Tạo đơn</span>
         </div>
 
         {/* Tab 3: Khách hàng */}
@@ -186,10 +192,10 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
           type="button"
           onClick={() => onSelectTab('customers')}
           className={`flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition active:scale-95 min-h-[44px] ${
-            activeTab === 'customers' ? 'text-amber-400 font-bold' : 'text-stone-400 hover:text-stone-200'
+            activeTab === 'customers' ? 'text-orange-400 font-bold' : 'text-stone-400 hover:text-stone-200'
           }`}
         >
-          <Users className={`w-5 h-5 mb-0.5 ${activeTab === 'customers' ? 'text-amber-400 stroke-[2.5]' : 'text-stone-400'}`} />
+          <Users className={`w-5 h-5 mb-0.5 ${activeTab === 'customers' ? 'text-orange-400 stroke-[2.5]' : 'text-stone-400'}`} />
           <span className="text-[10px]">Khách</span>
         </button>
 
@@ -198,10 +204,10 @@ export const CaosDynamicCapsule: React.FC<CaosDynamicCapsuleProps> = ({
           type="button"
           onClick={() => onSelectTab('pricing')}
           className={`flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition active:scale-95 min-h-[44px] ${
-            activeTab === 'pricing' ? 'text-amber-400 font-bold' : 'text-stone-400 hover:text-stone-200'
+            activeTab === 'pricing' ? 'text-orange-400 font-bold' : 'text-stone-400 hover:text-stone-200'
           }`}
         >
-          <Tag className={`w-5 h-5 mb-0.5 ${activeTab === 'pricing' ? 'text-amber-400 stroke-[2.5]' : 'text-stone-400'}`} />
+          <Tag className={`w-5 h-5 mb-0.5 ${activeTab === 'pricing' ? 'text-orange-400 stroke-[2.5]' : 'text-stone-400'}`} />
           <span className="text-[10px]">Bảng giá</span>
         </button>
       </div>
