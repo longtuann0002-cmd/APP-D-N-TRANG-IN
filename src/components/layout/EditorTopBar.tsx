@@ -276,8 +276,8 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
           </button>
         </div>
 
-        {/* Document view layout modes */}
-        <div className="flex items-center gap-0.5 pr-2 border-r border-stone-200">
+        {/* Document view layout modes (Desktop only) */}
+        <div className="hidden lg:flex items-center gap-0.5 pr-2 border-r border-stone-200">
           <button
             onClick={onToggleOrientation}
             className={`p-1 rounded text-stone-600 hover:bg-stone-200/50 transition ${isLandscape ? 'text-brand-600 font-bold' : ''}`}
@@ -295,7 +295,7 @@ export const EditorTopBar: React.FC<EditorTopBarProps> = ({
         </div>
 
         {/* Photo manipulation tools */}
-        <div className="flex items-center gap-0.5">
+        <div className="hidden sm:flex items-center gap-0.5">
           <button
             onClick={onRotateSelectedPhoto}
             disabled={!hasSelectedPhoto}

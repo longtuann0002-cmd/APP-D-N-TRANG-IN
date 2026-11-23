@@ -1064,49 +1064,51 @@ export function App() {
             {/* 3 Columns Editor Body matching PicDesk */}
             <div className="flex-1 flex overflow-hidden">
               
-              {/* Column 1: Kho ảnh (Left Sidebar 260px) */}
-              <PhotoLibrarySidebar
-                photos={activeProject.photos}
-                totalSlotsNeeded={activeProject.totalPhotosCount}
-                onAddPhotos={handleAddPhotos}
-                onRemovePhoto={handleRemovePhoto}
-                onRotatePhoto={handleRotatePhoto}
-                selectedPhotoId={selectedPhotoId}
-                onSelectPhoto={(photoId) => {
-                  if (photoId && selectedSlotId) {
-                    handleDropPhotoOnSlot(selectedSlotId, photoId);
-                    if (selectedSlotId.includes('__sub__')) {
-                      const [baseId, idxStr] = selectedSlotId.split('__sub__');
-                      const idx = parseInt(idxStr, 10);
-                      const currPage = activeProject.pages[currentPageIndex] || activeProject.pages[0];
-                      const slot = currPage?.placedPhotos.find(s => s.slotId === baseId);
-                      const subCount = slot?.subSlotLayout === 'strip-4' || slot?.subSlotLayout === 'grid-2x2' ? 4
-                        : slot?.subSlotLayout === 'strip-3' ? 3
-                        : slot?.subSlotLayout === 'strip-2' ? 2 : 1;
+              {/* Column 1: Kho ảnh (Left Sidebar 260px - Desktop Only) */}
+              <div className="hidden md:flex h-full">
+                <PhotoLibrarySidebar
+                  photos={activeProject.photos}
+                  totalSlotsNeeded={activeProject.totalPhotosCount}
+                  onAddPhotos={handleAddPhotos}
+                  onRemovePhoto={handleRemovePhoto}
+                  onRotatePhoto={handleRotatePhoto}
+                  selectedPhotoId={selectedPhotoId}
+                  onSelectPhoto={(photoId) => {
+                    if (photoId && selectedSlotId) {
+                      handleDropPhotoOnSlot(selectedSlotId, photoId);
+                      if (selectedSlotId.includes('__sub__')) {
+                        const [baseId, idxStr] = selectedSlotId.split('__sub__');
+                        const idx = parseInt(idxStr, 10);
+                        const currPage = activeProject.pages[currentPageIndex] || activeProject.pages[0];
+                        const slot = currPage?.placedPhotos.find(s => s.slotId === baseId);
+                        const subCount = slot?.subSlotLayout === 'strip-4' || slot?.subSlotLayout === 'grid-2x2' ? 4
+                          : slot?.subSlotLayout === 'strip-3' ? 3
+                          : slot?.subSlotLayout === 'strip-2' ? 2 : 1;
 
-                      if (idx + 1 < subCount) {
-                        setSelectedSlotId(`${baseId}__sub__${idx + 1}`);
+                        if (idx + 1 < subCount) {
+                          setSelectedSlotId(`${baseId}__sub__${idx + 1}`);
+                        } else {
+                          setSelectedSlotId(null);
+                        }
                       } else {
                         setSelectedSlotId(null);
                       }
                     } else {
-                      setSelectedSlotId(null);
+                      setSelectedPhotoId(photoId);
                     }
-                  } else {
-                    setSelectedPhotoId(photoId);
-                  }
-                }}
-                onAdjustPhotoCrop={(photo) => setCropModalPhoto(photo)}
-                onAdjustPhotoFilter={(photo) => setFilterModalPhoto(photo)}
-                onChangeCopiesCount={handleChangeCopiesCount}
-                onRemoveFromSlots={handleRemovePhotoFromAllSlots}
-                assignedSlotsCountMap={assignedSlotsCountMap}
-                slotDimensionsMm={{
-                  width: activeProject.layoutConfig.customWidthMm || 54,
-                  height: activeProject.layoutConfig.customHeightMm || 86
-                }}
-                onQuickAutoLayout={handleQuickAutoLayout}
-              />
+                  }}
+                  onAdjustPhotoCrop={(photo) => setCropModalPhoto(photo)}
+                  onAdjustPhotoFilter={(photo) => setFilterModalPhoto(photo)}
+                  onChangeCopiesCount={handleChangeCopiesCount}
+                  onRemoveFromSlots={handleRemovePhotoFromAllSlots}
+                  assignedSlotsCountMap={assignedSlotsCountMap}
+                  slotDimensionsMm={{
+                    width: activeProject.layoutConfig.customWidthMm || 54,
+                    height: activeProject.layoutConfig.customHeightMm || 86
+                  }}
+                  onQuickAutoLayout={handleQuickAutoLayout}
+                />
+              </div>
 
               {/* Column 2: Center Interactive Canvas Viewport */}
               <InteractiveCanvas
@@ -1139,22 +1141,24 @@ export function App() {
                 onCloseAllPagesView={() => setShowAllPagesView(false)}
               />
 
-              {/* Column 3: Thiết lập in (Right Accordion Panel 320px) */}
-              <PrintSettingsAccordion
-                paperConfig={activeProject.paperConfig}
-                layoutConfig={activeProject.layoutConfig}
-                onChangePaperConfig={(cfg) => {
-                  triggerLayoutRecalculation(cfg, activeProject.layoutConfig, activeProject.photos, activeProject);
-                }}
-                onChangeLayoutConfig={(cfg) => {
-                  triggerLayoutRecalculation(activeProject.paperConfig, cfg, activeProject.photos, activeProject);
-                }}
-                onQuickAutoLayout={handleQuickAutoLayout}
-                photosCount={activeProject.photos.length}
-                totalPages={activeProject.pages.length}
-                wastePercent={currentPage ? currentPage.wastePercent : 0}
-                onOpenExportModal={() => setIsExportModalOpen(true)}
-              />
+              {/* Column 3: Thiết lập in (Right Accordion Panel 320px - Desktop Only) */}
+              <div className="hidden md:flex h-full">
+                <PrintSettingsAccordion
+                  paperConfig={activeProject.paperConfig}
+                  layoutConfig={activeProject.layoutConfig}
+                  onChangePaperConfig={(cfg) => {
+                    triggerLayoutRecalculation(cfg, activeProject.layoutConfig, activeProject.photos, activeProject);
+                  }}
+                  onChangeLayoutConfig={(cfg) => {
+                    triggerLayoutRecalculation(activeProject.paperConfig, cfg, activeProject.photos, activeProject);
+                  }}
+                  onQuickAutoLayout={handleQuickAutoLayout}
+                  photosCount={activeProject.photos.length}
+                  totalPages={activeProject.pages.length}
+                  wastePercent={currentPage ? currentPage.wastePercent : 0}
+                  onOpenExportModal={() => setIsExportModalOpen(true)}
+                />
+              </div>
 
             </div>
 

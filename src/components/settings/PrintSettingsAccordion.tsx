@@ -169,6 +169,33 @@ export const PrintSettingsAccordion: React.FC<PrintSettingsAccordionProps> = ({
           </div>
         </div>
 
+        {/* Prominent Quick Export & Stats on Top */}
+        <div className="p-3 bg-stone-50/90 border-b border-stone-200/80 space-y-2">
+          <button
+            onClick={onOpenExportModal}
+            className="w-full py-2.5 bg-gradient-to-r from-stone-900 via-stone-800 to-amber-600 hover:from-black hover:to-amber-500 text-white font-bold text-xs rounded-xl shadow-md shadow-stone-900/15 transition-all active:scale-98 flex items-center justify-center gap-2 group"
+          >
+            <FileDown className="w-4 h-4 text-amber-300" />
+            <span>Xuất file in (PDF / Ảnh 300 DPI)</span>
+          </button>
+
+          {/* Quick Metrics */}
+          <div className="grid grid-cols-3 gap-1.5 text-center text-xs">
+            <div className="bg-white py-1.5 px-1 rounded-lg border border-stone-200/70 shadow-2xs">
+              <span className="font-extrabold text-stone-900 block leading-tight">{photosCount}</span>
+              <span className="text-[10px] text-stone-400">ảnh</span>
+            </div>
+            <div className="bg-white py-1.5 px-1 rounded-lg border border-stone-200/70 shadow-2xs">
+              <span className="font-extrabold text-stone-900 block leading-tight">{totalPages}</span>
+              <span className="text-[10px] text-stone-400">tờ {paperConfig.sizeId}</span>
+            </div>
+            <div className="bg-white py-1.5 px-1 rounded-lg border border-stone-200/70 shadow-2xs">
+              <span className={`font-extrabold block leading-tight ${wastePercent > 40 ? 'text-amber-600' : 'text-emerald-600'}`}>{100 - wastePercent}%</span>
+              <span className="text-[10px] text-stone-400">dùng giấy</span>
+            </div>
+          </div>
+        </div>
+
         {/* 5 Accordion Steps matching Screenshot */}
         <div className="p-3 space-y-2 overflow-y-auto max-h-[calc(100vh-220px)]">
           
