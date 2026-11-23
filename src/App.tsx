@@ -144,6 +144,21 @@ export function App() {
     isMobileSettingsOpen ||
     isTemplateModalOpen;
 
+  // Lock background body scroll whenever any modal or bottom sheet is open (fixes iOS scroll bleed)
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      const originalOverflow = document.body.style.overflow;
+      const originalTouchAction = document.body.style.touchAction;
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        document.body.style.touchAction = originalTouchAction;
+      };
+    }
+  }, [isAnyModalOpen]);
+
   // Editor specific state
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
@@ -1256,14 +1271,14 @@ export function App() {
 
       {/* Mobile: Kho ảnh Bottom Sheet (Spatial Dark Glass) */}
       {isMobilePhotosOpen && activeProject && (
-        <div className="fixed inset-0 z-[60] md:hidden">
+        <div className="fixed inset-0 z-[60] md:hidden overscroll-contain">
           {/* Scrim */}
           <div
             className="absolute inset-0 bg-stone-950/50 backdrop-blur-sm"
             onClick={() => setIsMobilePhotosOpen(false)}
           />
           {/* Bottom Sheet */}
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-20px_60px_rgba(0,0,0,0.25)] max-h-[78dvh] flex flex-col overflow-hidden border-t border-stone-200/60">
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-20px_60px_rgba(0,0,0,0.25)] max-h-[78dvh] flex flex-col overflow-hidden border-t border-stone-200/60 overscroll-contain">
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-2 shrink-0">
               <div className="w-10 h-1 rounded-full bg-stone-300" />
@@ -1321,14 +1336,14 @@ export function App() {
 
       {/* Mobile: Thiết lập in Bottom Sheet */}
       {isMobileSettingsOpen && activeProject && (
-        <div className="fixed inset-0 z-[60] md:hidden">
+        <div className="fixed inset-0 z-[60] md:hidden overscroll-contain">
           {/* Scrim */}
           <div
             className="absolute inset-0 bg-stone-950/50 backdrop-blur-sm"
             onClick={() => setIsMobileSettingsOpen(false)}
           />
           {/* Bottom Sheet */}
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-20px_60px_rgba(0,0,0,0.25)] max-h-[82dvh] flex flex-col overflow-hidden border-t border-stone-200/60">
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-20px_60px_rgba(0,0,0,0.25)] max-h-[82dvh] flex flex-col overflow-hidden border-t border-stone-200/60 overscroll-contain">
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-2 shrink-0">
               <div className="w-10 h-1 rounded-full bg-stone-300" />

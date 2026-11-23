@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, Check, Tag, Columns, Layers } from 'lucide-react';
 import { TemplateItem, BorderStyle, SubSlotLayout, PriceTier } from '../../types';
 
@@ -170,6 +170,19 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
     }
   };
 
+  // Prevent background scroll bleed while modal is open
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    const originalTouchAction = document.body.style.touchAction;
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.touchAction = originalTouchAction;
+    };
+  }, []);
+
   const handleSave = () => {
     if (!name.trim()) return;
 
@@ -211,8 +224,8 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl shadow-2xl border border-stone-200 w-full max-w-4xl overflow-hidden flex flex-col max-h-[94dvh]">
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none animate-in fade-in duration-150 overscroll-contain">
+      <div className="bg-white rounded-3xl shadow-2xl border border-stone-200 w-full max-w-4xl overflow-hidden flex flex-col max-h-[94dvh] overscroll-contain">
         {/* Header */}
         <div className="px-5 sm:px-6 py-3.5 border-b border-stone-100 flex items-center justify-between bg-stone-50/70 shrink-0">
           <div className="flex items-center gap-2.5">
@@ -234,11 +247,11 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           </button>
         </div>
 
-        {/* Body 2 columns */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden p-4 sm:p-6 gap-5 sm:gap-6">
+        {/* Body 2 columns: on mobile, one continuous scroll; on desktop, 2 independent columns */}
+        <div className="flex-1 flex flex-col md:flex-row overflow-y-auto overscroll-contain md:overflow-hidden p-4 sm:p-6 gap-5 sm:gap-6">
           
           {/* Left: Live Visual Preview */}
-          <div className="w-full md:w-80 flex flex-col items-center justify-between bg-stone-100/70 border border-stone-200 rounded-2xl p-4 shrink-0 overflow-y-auto">
+          <div className="w-full md:w-80 flex flex-col items-center justify-between bg-stone-100/70 border border-stone-200 rounded-2xl p-4 shrink-0 md:overflow-y-auto">
             <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-2">
               Mô phỏng kích thước thực tế
             </span>
@@ -346,7 +359,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           </div>
 
           {/* Right: Controls form */}
-          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+          <div className="flex-1 md:overflow-y-auto space-y-4 pr-0 md:pr-1">
             {/* Tên & Mô tả */}
             <div>
               <label className="text-xs font-bold text-stone-700 mb-1 block">Tên mẫu khung</label>

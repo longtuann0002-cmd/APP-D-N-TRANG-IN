@@ -479,8 +479,8 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-0 md:p-3 select-none">
-      <div className="bg-white rounded-none md:rounded-3xl shadow-2xl border-0 md:border border-stone-200/90 w-full max-w-6xl h-full md:h-[94vh] flex flex-col overflow-hidden animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-[100] bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-0 md:p-3 select-none overscroll-contain">
+      <div className="bg-white rounded-none md:rounded-3xl shadow-2xl border-0 md:border border-stone-200/90 w-full max-w-6xl h-full md:h-[94vh] flex flex-col overflow-hidden animate-in fade-in duration-150 overscroll-contain">
         
         {/* Header */}
         <div className="px-4 md:px-7 pt-3 md:pt-5 pb-2 flex items-center justify-between shrink-0 border-b border-stone-100 md:border-b-0">
@@ -527,7 +527,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
         <div className="flex-1 flex overflow-hidden px-4 md:px-7 py-3 gap-6 min-h-0 flex-col md:flex-row">
           
           {/* Left Column: 4 Steps */}
-          <div className={`${mobileTab === 'form' ? 'block' : 'hidden'} md:block w-full md:w-1/2 overflow-y-auto space-y-5 pr-0 md:pr-3`}>
+          <div className={`${mobileTab === 'form' ? 'block' : 'hidden'} md:block w-full md:w-1/2 overflow-y-auto overscroll-contain space-y-5 pr-0 md:pr-3`}>
             
             {/* Step 1: Khổ giấy */}
             <div>
@@ -1324,7 +1324,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
           </div>
 
           {/* Right Column: "Xem trước" Panel */}
-          <div className={`${mobileTab === 'preview' ? 'flex' : 'hidden'} md:flex w-full md:w-1/2 bg-[#ededec] rounded-3xl p-4 md:p-5 flex-col shrink-0 min-h-0 overflow-y-auto`}>
+          <div className={`${mobileTab === 'preview' ? 'flex' : 'hidden'} md:flex w-full md:w-1/2 bg-[#ededec] rounded-3xl p-4 md:p-5 flex-col shrink-0 min-h-0 overflow-y-auto overscroll-contain`}>
 
             {/* Header: Xem trước + Pagination */}
             <div className="flex items-center justify-between mb-2 shrink-0">

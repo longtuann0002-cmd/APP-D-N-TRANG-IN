@@ -105,8 +105,8 @@ export const PrinterCalibrationModal: React.FC<PrinterCalibrationModalProps> = (
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none">
-      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-4xl max-h-[92dvh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-[100] bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none overscroll-contain">
+      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-4xl max-h-[92dvh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 overscroll-contain">
         
         {/* Header matching Screenshot 10 */}
         <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-stone-100 flex items-center justify-between shrink-0">
@@ -129,7 +129,7 @@ export const PrinterCalibrationModal: React.FC<PrinterCalibrationModalProps> = (
         </div>
 
         {/* Modal Body */}
-        <div className="p-4 sm:p-6 overflow-y-auto space-y-5 sm:space-y-6 text-xs flex-1">
+        <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain space-y-5 sm:space-y-6 text-xs flex-1">
           
           {/* Section 1: Thông tin máy in */}
           <div className="bg-stone-50/70 p-4 sm:p-5 rounded-2xl border border-stone-200/80 space-y-3">

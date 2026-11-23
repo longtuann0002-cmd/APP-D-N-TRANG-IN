@@ -133,8 +133,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none">
-      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-lg max-h-[92dvh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-[100] bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 select-none overscroll-contain">
+      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-lg max-h-[92dvh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 overscroll-contain">
         
         {/* Header */}
         <div className="px-5 sm:px-6 py-3.5 border-b border-stone-100 flex items-center justify-between shrink-0">
