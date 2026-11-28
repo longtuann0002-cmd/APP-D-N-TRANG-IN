@@ -437,32 +437,6 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
     }
   };
 
-  const handleWheelOnCanvas = (e: React.WheelEvent<HTMLCanvasElement>) => {
-    if (!inlineCropSlotId || !onUpdatePhotoCrop) return;
-    const hitId = getSlotAtPoint(e.clientX, e.clientY);
-    if (hitId !== inlineCropSlotId) return;
-
-    const details = getSlotDetailsById(inlineCropSlotId);
-    if (!details) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    const current = details.photo.cropSettings || {
-      mode: (details.photo.cropMode || layoutConfig.cropMode || 'fill') as 'fill' | 'fit',
-      scale: 1,
-      offsetX: 0,
-      offsetY: 0
-    };
-    const delta = e.deltaY < 0 ? 0.08 : -0.08;
-    const nextScale = Math.max(0.3, Math.min(4.0, Math.round(((current.scale ?? 1) + delta) * 100) / 100));
-    onUpdatePhotoCrop(details.photo.id, {
-      ...current,
-      mode: 'custom',
-      scale: nextScale
-    }, true);
-  };
-
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const slotId = getSlotAtPoint(e.clientX, e.clientY);
     if (slotId !== hoveredSlotId) {
@@ -523,7 +497,6 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
               e.stopPropagation();
             }
           }}
-          onWheel={handleWheelOnCanvas}
           onTouchStart={(e) => {
             if (e.touches.length === 1 && beginInlineDrag(e.touches[0].clientX, e.touches[0].clientY)) {
               e.stopPropagation();
@@ -887,7 +860,7 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
                 <>
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-500/20 text-orange-300 rounded-lg text-[11px] font-semibold shrink-0">
                     <Move className="w-3 h-3" />
-                    <span>Kéo ảnh • Cuộn để zoom</span>
+                    <span>Kéo ảnh • Kéo góc để phóng to/nhỏ</span>
                   </span>
 
                   <div className="flex items-center gap-1 bg-stone-800 rounded-lg p-0.5">
