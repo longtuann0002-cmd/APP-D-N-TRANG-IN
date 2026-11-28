@@ -159,7 +159,17 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
     return null;
   };
 
-  const getSlotDetailsById = (targetId: string): { photo: PhotoItem; widthPx: number; heightPx: number } | null => {
+  const getSlotDetailsById = (targetId: string): {
+    photo: PhotoItem;
+    widthPx: number;
+    heightPx: number;
+    boxLeft: number;
+    boxTop: number;
+    boxWidth: number;
+    boxHeight: number;
+    boxCenterX: number;
+    boxCenterY: number;
+  } | null => {
     if (!page) return null;
     const isSub = targetId.includes('__sub__');
     const baseId = isSub ? targetId.split('__sub__')[0] : targetId;
@@ -173,10 +183,141 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
 
     const subCells = getSlotSubCells(slot, layoutConfig);
     const cell = subCells.length > 1 ? subCells.find(c => c.subKey === targetId) : null;
-    const widthMm = cell ? cell.width : slot.width;
-    const heightMm = cell ? cell.height : slot.height;
-    return { photo, widthPx: widthMm * scale, heightPx: heightMm * scale };
+    const cellX = (cell ? cell.x : slot.x) * scale;
+    const cellY = (cell ? cell.y : slot.y) * scale;
+    const cellW = (cell ? cell.width : slot.width) * scale;
+    const cellH = (cell ? cell.height : slot.height) * scale;
+
+    const slotRotationOffset = slot.rotated ? (layoutConfig.rotationHeadDirection === 'right' ? 90 : 270) : 0;
+    const totalRotation = ((photo.rotation || 0) + slotRotationOffset) % 360;
+    const isSideways = totalRotation === 90 || totalRotation === 270;
+    const localSlotW = isSideways ? cellH : cellW;
+    const localSlotH = isSideways ? cellW : cellH;
+
+    const imgW = photo.widthPx || 1000;
+    const imgH = photo.heightPx || 1000;
+    const crop = photo.cropSettings;
+    const effectiveMode = crop?.mode || photo.cropMode || layoutConfig.cropMode || 'fill';
+    const userScale = crop?.scale !== undefined ? crop.scale : 1.0;
+    const baseScale = effectiveMode === 'fit'
+      ? Math.min(localSlotW / imgW, localSlotH / imgH)
+      : Math.max(localSlotW / imgW, localSlotH / imgH);
+
+    const drawW = imgW * baseScale * userScale;
+    const drawH = imgH * baseScale * userScale;
+    const boxWidth = isSideways ? drawH : drawW;
+    const boxHeight = isSideways ? drawW : drawH;
+
+    let offX = ((crop?.offsetX || 0) / 100) * localSlotW;
+    const offY = ((crop?.offsetY || 0) / 100) * localSlotH;
+    if (photo.flipHorizontal) offX = -offX;
+
+    let rotDx = offX;
+    let rotDy = offY;
+    if (totalRotation === 90) { rotDx = -offY; rotDy = offX; }
+    else if (totalRotation === 180) { rotDx = -offX; rotDy = -offY; }
+    else if (totalRotation === 270) { rotDx = offY; rotDy = -offX; }
+
+    const boxCenterX = cellX + cellW / 2 + rotDx;
+    const boxCenterY = cellY + cellH / 2 + rotDy;
+
+    return {
+      photo,
+      widthPx: cellW,
+      heightPx: cellH,
+      boxLeft: boxCenterX - boxWidth / 2,
+      boxTop: boxCenterY - boxHeight / 2,
+      boxWidth,
+      boxHeight,
+      boxCenterX,
+      boxCenterY
+    };
   };
+
+  const inlineImageBox = inlineCropSlotId ? getSlotDetailsById(inlineCropSlotId) : null;
+
+  const cornerResizeRef = useRef<{
+    centerScreenX: number;
+    centerScreenY: number;
+    startDist: number;
+    startScale: number;
+    photo: PhotoItem;
+    baseCrop: PhotoCropSettings;
+  } | null>(null);
+  const [isResizingCorner, setIsResizingCorner] = useState(false);
+
+  const beginCornerResize = (clientX: number, clientY: number) => {
+    if (!inlineImageBox || !canvasRef.current || !onUpdatePhotoCrop) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const centerScreenX = rect.left + inlineImageBox.boxCenterX;
+    const centerScreenY = rect.top + inlineImageBox.boxCenterY;
+    const startDist = Math.max(12, Math.hypot(clientX - centerScreenX, clientY - centerScreenY));
+    const current = inlineImageBox.photo.cropSettings || {
+      mode: (inlineImageBox.photo.cropMode || layoutConfig.cropMode || 'fill') as 'fill' | 'fit',
+      scale: 1,
+      offsetX: 0,
+      offsetY: 0
+    };
+    cornerResizeRef.current = {
+      centerScreenX,
+      centerScreenY,
+      startDist,
+      startScale: current.scale ?? 1,
+      photo: inlineImageBox.photo,
+      baseCrop: current
+    };
+    setIsResizingCorner(true);
+  };
+
+  useEffect(() => {
+    if (!isResizingCorner) return;
+
+    const calcNextScale = (clientX: number, clientY: number) => {
+      const r = cornerResizeRef.current;
+      if (!r) return 1;
+      const currDist = Math.max(8, Math.hypot(clientX - r.centerScreenX, clientY - r.centerScreenY));
+      return Math.max(0.3, Math.min(4.0, Math.round(r.startScale * (currDist / r.startDist) * 100) / 100));
+    };
+
+    const onMove = (clientX: number, clientY: number) => {
+      const r = cornerResizeRef.current;
+      if (!r || !onUpdatePhotoCrop) return;
+      onUpdatePhotoCrop(r.photo.id, { ...r.baseCrop, mode: 'custom', scale: calcNextScale(clientX, clientY) }, false);
+    };
+
+    const onEnd = (clientX: number, clientY: number) => {
+      const r = cornerResizeRef.current;
+      if (r && onUpdatePhotoCrop) {
+        onUpdatePhotoCrop(r.photo.id, { ...r.baseCrop, mode: 'custom', scale: calcNextScale(clientX, clientY) }, true);
+      }
+      cornerResizeRef.current = null;
+      setIsResizingCorner(false);
+    };
+
+    const onMouseMove = (e: MouseEvent) => onMove(e.clientX, e.clientY);
+    const onMouseUp = (e: MouseEvent) => onEnd(e.clientX, e.clientY);
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        e.preventDefault();
+        onMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      const t = e.changedTouches[0];
+      if (t) onEnd(t.clientX, t.clientY);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd);
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [isResizingCorner, onUpdatePhotoCrop]);
 
   const inlineDragRef = useRef<{
     startX: number;
@@ -369,7 +510,7 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
 
       {/* Sheet White Paper Container */}
       <div 
-        className={'shadow-sheet-lg rounded-xs transition-all duration-100 flex items-center justify-center bg-white border ' + (
+        className={'relative shadow-sheet-lg rounded-xs transition-all duration-100 flex items-center justify-center bg-white border ' + (
           isActive ? 'border-stone-400 ring-2 ring-stone-800/10' : 'border-stone-300'
         )}
       >
@@ -404,6 +545,43 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
           onDrop={handleDrop}
           className={`${inlineCropSlotId ? 'cursor-move' : 'cursor-pointer'} touch-manipulation`}
         />
+
+        {/* Canva-style 4-corner resize handles for inline image adjustment */}
+        {inlineImageBox && (
+          <div
+            className="pointer-events-none absolute border-2 border-dashed border-orange-500/90 z-10"
+            style={{
+              left: `${inlineImageBox.boxLeft}px`,
+              top: `${inlineImageBox.boxTop}px`,
+              width: `${inlineImageBox.boxWidth}px`,
+              height: `${inlineImageBox.boxHeight}px`,
+            }}
+          >
+            {[
+              { pos: '-top-2 -left-2', cursor: 'cursor-nwse-resize' },
+              { pos: '-top-2 -right-2', cursor: 'cursor-nesw-resize' },
+              { pos: '-bottom-2 -left-2', cursor: 'cursor-nesw-resize' },
+              { pos: '-bottom-2 -right-2', cursor: 'cursor-nwse-resize' },
+            ].map((corner, idx) => (
+              <div
+                key={idx}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  beginCornerResize(e.clientX, e.clientY);
+                }}
+                onTouchStart={(e) => {
+                  if (e.touches.length === 1) {
+                    e.stopPropagation();
+                    beginCornerResize(e.touches[0].clientX, e.touches[0].clientY);
+                  }
+                }}
+                className={`pointer-events-auto absolute ${corner.pos} w-4 h-4 rounded-full bg-white border-[2.5px] border-orange-500 shadow-md hover:scale-125 active:scale-125 transition-transform ${corner.cursor}`}
+                title="Kéo góc để phóng to / thu nhỏ ảnh"
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
