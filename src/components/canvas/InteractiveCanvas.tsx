@@ -822,7 +822,7 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
 
       {/* Selected Slot Floating Actions */}
       {selectedSlotId && (
-        <div className="absolute top-2 md:top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 md:gap-2 bg-stone-900/95 text-white px-2.5 md:px-3.5 py-1.5 rounded-2xl shadow-2xl text-xs backdrop-blur-md max-w-[94vw] overflow-x-auto no-scrollbar border border-white/10 animate-in fade-in duration-150">
+        <div className="absolute top-2 md:top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 md:gap-2 bg-stone-900/95 text-white px-3 md:px-4 py-1.5 rounded-2xl shadow-2xl text-xs backdrop-blur-md w-max max-w-[calc(100%-24px)] overflow-x-auto no-scrollbar border border-white/10 animate-in fade-in duration-150">
           <span className="shrink-0 whitespace-nowrap">
             Ô: <strong className="text-orange-400">
               {subSlotIndex !== null ? `Ảnh #${subSlotIndex + 1}` : (selectedSlot?.slot?.presetName || selectedSlot?.slot?.label || 'Khung in')}
@@ -834,36 +834,36 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
           
           {slotPhoto ? (
             <>
-              <div className="h-3.5 w-px bg-stone-700" />
+              <div className="h-3.5 w-px bg-stone-700 shrink-0" />
               
               <button
                 onClick={() => onRotatePhotoInSlot(selectedSlotId)}
-                className="flex items-center gap-1 px-2 py-0.5 bg-stone-800 hover:bg-stone-700 rounded-lg transition text-[11px]"
+                className="flex items-center gap-1 px-2 py-1 bg-stone-800 hover:bg-stone-700 rounded-lg transition text-[11px] whitespace-nowrap shrink-0"
                 title="Xoay ảnh 90°"
               >
-                <RotateCw className="w-3 h-3" />
+                <RotateCw className="w-3 h-3 shrink-0" />
                 <span>Xoay</span>
               </button>
 
               {onFlipPhotoInSlot && (
                 <button
                   onClick={() => onFlipPhotoInSlot(selectedSlotId)}
-                  className="flex items-center gap-1 px-2 py-0.5 bg-stone-800 hover:bg-stone-700 rounded-lg transition text-[11px]"
+                  className="flex items-center gap-1 px-2 py-1 bg-stone-800 hover:bg-stone-700 rounded-lg transition text-[11px] whitespace-nowrap shrink-0"
                   title="Lật ảnh ngang"
                 >
-                  <FlipHorizontal className="w-3 h-3" />
+                  <FlipHorizontal className="w-3 h-3 shrink-0" />
                   <span>Lật</span>
                 </button>
               )}
 
               {inlineCropSlotId === selectedSlotId && onUpdatePhotoCrop ? (
                 <>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-500/20 text-orange-300 rounded-lg text-[11px] font-semibold shrink-0">
-                    <Move className="w-3 h-3" />
-                    <span>Kéo ảnh • Kéo góc để phóng to/nhỏ</span>
+                  <span className="hidden lg:inline-flex items-center gap-1 px-2 py-1 bg-orange-500/20 text-orange-300 rounded-lg text-[11px] font-semibold whitespace-nowrap shrink-0">
+                    <Move className="w-3 h-3 shrink-0" />
+                    <span>Kéo ảnh / góc</span>
                   </span>
 
-                  <div className="flex items-center gap-1 bg-stone-800 rounded-lg p-0.5">
+                  <div className="flex items-center gap-0.5 bg-stone-800 rounded-lg p-0.5 shrink-0">
                     <button
                       type="button"
                       onClick={() => {
@@ -871,7 +871,7 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
                         const nextScale = Math.max(0.3, Math.round(((cur.scale ?? 1) - 0.1) * 100) / 100);
                         onUpdatePhotoCrop(slotPhoto.id, { ...cur, mode: 'custom', scale: nextScale }, true);
                       }}
-                      className="p-1 hover:bg-stone-700 rounded transition"
+                      className="p-1 hover:bg-stone-700 rounded transition shrink-0"
                       title="Thu nhỏ ảnh"
                     >
                       <ZoomOut className="w-3 h-3" />
@@ -881,7 +881,7 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
                       onClick={() => {
                         onUpdatePhotoCrop(slotPhoto.id, { mode: 'fill', scale: 1, offsetX: 0, offsetY: 0 }, true);
                       }}
-                      className="px-1.5 py-0.5 text-[10px] font-bold hover:bg-stone-700 rounded transition min-w-[38px] text-center"
+                      className="px-1.5 py-0.5 text-[10px] font-bold hover:bg-stone-700 rounded transition min-w-[38px] text-center whitespace-nowrap shrink-0"
                       title="Đặt lại vị trí & kích thước 100%"
                     >
                       {Math.round(((slotPhoto.cropSettings?.scale ?? 1)) * 100)}%
@@ -893,7 +893,7 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
                         const nextScale = Math.min(4.0, Math.round(((cur.scale ?? 1) + 0.1) * 100) / 100);
                         onUpdatePhotoCrop(slotPhoto.id, { ...cur, mode: 'custom', scale: nextScale }, true);
                       }}
-                      className="p-1 hover:bg-stone-700 rounded transition"
+                      className="p-1 hover:bg-stone-700 rounded transition shrink-0"
                       title="Phóng to ảnh"
                     >
                       <ZoomIn className="w-3 h-3" />
@@ -903,37 +903,37 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
                   <button
                     type="button"
                     onClick={() => setInlineCropSlotId(null)}
-                    className="flex items-center gap-1 px-2.5 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition text-[11px] font-bold"
+                    className="flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition text-[11px] font-bold whitespace-nowrap shrink-0"
                   >
-                    <Check className="w-3 h-3" />
+                    <Check className="w-3 h-3 shrink-0" />
                     <span>Xong</span>
                   </button>
                 </>
               ) : onUpdatePhotoCrop ? (
                 <button
                   onClick={() => setInlineCropSlotId(selectedSlotId)}
-                  className="flex items-center gap-1 px-2 py-0.5 bg-orange-500 hover:bg-orange-400 text-white rounded-lg transition text-[11px] font-semibold"
+                  className="flex items-center gap-1 px-2 py-1 bg-orange-500 hover:bg-orange-400 text-white rounded-lg transition text-[11px] font-semibold whitespace-nowrap shrink-0"
                   title="Kéo & phóng to thu nhỏ ảnh trực tiếp trên khung"
                 >
-                  <Crop className="w-3 h-3" />
+                  <Crop className="w-3 h-3 shrink-0" />
                   <span>Căn trong khung</span>
                 </button>
               ) : onAdjustCropInSlot ? (
                 <button
                   onClick={() => onAdjustCropInSlot(selectedSlotId)}
-                  className="flex items-center gap-1 px-2 py-0.5 bg-brand-600 hover:bg-brand-500 rounded-lg transition text-[11px] font-semibold"
+                  className="flex items-center gap-1 px-2 py-1 bg-brand-600 hover:bg-brand-500 rounded-lg transition text-[11px] font-semibold whitespace-nowrap shrink-0"
                   title="Căn chỉnh kích thước & vị trí ảnh trong khung"
                 >
-                  <Crop className="w-3 h-3" />
+                  <Crop className="w-3 h-3 shrink-0" />
                   <span>Căn trong khung</span>
                 </button>
               ) : onToggleCropPhotoInSlot && (
                 <button
                   onClick={() => onToggleCropPhotoInSlot(selectedSlotId)}
-                  className="flex items-center gap-1 px-2 py-0.5 bg-stone-800 hover:bg-stone-700 rounded-lg transition text-[11px]"
+                  className="flex items-center gap-1 px-2 py-1 bg-stone-800 hover:bg-stone-700 rounded-lg transition text-[11px] whitespace-nowrap shrink-0"
                   title="Đổi Fill / Fit"
                 >
-                  <Crop className="w-3 h-3" />
+                  <Crop className="w-3 h-3 shrink-0" />
                   <span>{currentCrop === 'fill' ? 'Phủ đầy' : 'Giữ trọn'}</span>
                 </button>
               )}
@@ -941,10 +941,10 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
               {onAdjustFilterInSlot && (
                 <button
                   onClick={() => onAdjustFilterInSlot(selectedSlotId)}
-                  className="flex items-center gap-1 px-2 py-0.5 bg-stone-800 hover:bg-stone-700 rounded-lg transition text-[11px]"
+                  className="flex items-center gap-1 px-2 py-1 bg-stone-800 hover:bg-stone-700 rounded-lg transition text-[11px] whitespace-nowrap shrink-0"
                   title="Chỉnh màu ảnh"
                 >
-                  <Sparkles className="w-3 h-3 text-orange-400" />
+                  <Sparkles className="w-3 h-3 text-orange-400 shrink-0" />
                   <span>Chỉnh màu</span>
                 </button>
               )}
@@ -952,10 +952,10 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
               {onRemovePhotoFromSlot && (
                 <button
                   onClick={() => onRemovePhotoFromSlot(selectedSlotId)}
-                  className="flex items-center gap-1 px-2 py-0.5 bg-stone-800 hover:bg-red-900/80 text-stone-300 hover:text-red-200 rounded-lg transition text-[11px]"
+                  className="flex items-center gap-1 px-2 py-1 bg-stone-800 hover:bg-red-900/80 text-stone-300 hover:text-red-200 rounded-lg transition text-[11px] whitespace-nowrap shrink-0"
                   title="Gỡ ảnh khỏi ô này"
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="w-3 h-3 shrink-0" />
                   <span>Gỡ</span>
                 </button>
               )}
