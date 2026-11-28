@@ -324,12 +324,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       onClick={async () => {
                         setIsLoading(true);
                         setAuthMsg(null);
-                        const ok = await storageManager.pushAllToCloud();
+                        const res = await storageManager.pushAllToCloud();
                         setIsLoading(false);
-                        if (ok) {
+                        if (res.ok) {
                           setAuthMsg({ type: 'success', text: 'Đã đẩy toàn bộ đơn hàng, mẫu & bảng giá lên Cloud!' });
                         } else {
-                          setAuthMsg({ type: 'error', text: 'Không đẩy được lên Cloud. Hãy kiểm tra đăng nhập.' });
+                          setAuthMsg({ type: 'error', text: res.error || 'Không đẩy được lên Cloud. Hãy kiểm tra đăng nhập.' });
                         }
                       }}
                       className="px-3 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-semibold text-[11px] flex items-center justify-center gap-1.5 transition active:scale-95 disabled:opacity-50"

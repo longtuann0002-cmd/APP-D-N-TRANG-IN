@@ -465,12 +465,16 @@ export const storageManager = {
   },
 
   /** Push all local data up to Supabase (first-time setup or force sync) */
-  async pushAllToCloud(): Promise<boolean> {
-    if (!isSupabaseConfigured() || !supabase) return false;
+  async pushAllToCloud(): Promise<{ ok: boolean; error?: string }> {
+    if (!isSupabaseConfigured() || !supabase) {
+      return { ok: false, error: 'Chưa kết nối Supabase Cloud.' };
+    }
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const user = session?.user;
-      if (!user) return false;
+      if (!user) {
+        return { ok: false, error: 'Phiên đăng nhập Cloud đã hết hạn. Vui lòng bấm "Đăng xuất" rồi đăng nhập lại.' };
+      }
 
       const now = new Date().toISOString();
       const rows = [
@@ -486,11 +490,14 @@ export const storageManager = {
 
       const { error } = await supabase.from('app_state').upsert(rows, { onConflict: 'user_id,data_key' });
 
-      if (error) { console.warn('pushAllToCloud error:', error.message); return false; }
-      return true;
-    } catch (err) {
+      if (error) {
+        console.warn('pushAllToCloud error:', error.message);
+        return { ok: false, error: `Lỗi Supabase: ${error.message}` };
+      }
+      return { ok: true };
+    } catch (err: any) {
       console.warn('pushAllToCloud exception:', err);
-      return false;
+      return { ok: false, error: err?.message || 'Lỗi không xác định khi đẩy dữ liệu.' };
     }
   }
 };

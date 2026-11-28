@@ -13,7 +13,7 @@ import {
 } from './types';
 import { storageManager } from './core/storage/storageManager';
 import { computeLayout } from './core/layout/layoutEngine';
-import { isSupabaseConfigured, getCurrentUser, UserProfile, supabase, saveUserSession } from './core/storage/supabaseClient';
+import { isSupabaseConfigured, getCurrentUser, UserProfile, supabase, saveUserSession, logoutUser } from './core/storage/supabaseClient';
 import { getDemoPhotos } from './core/image/samplePhotos';
 import { restoreProjectPhotos } from './core/image/imageProcessor';
 import { deletePhotoBlob, clearProjectBlobs } from './core/storage/indexedDbStorage';
@@ -286,6 +286,13 @@ export function App() {
           };
           saveUserSession(profile);
           setCurrentUser(profile);
+        } else {
+          // Stale localStorage profile without a real Supabase JWT session -> require clean re-login
+          const cached = getCurrentUser();
+          if (cached?.isCloud) {
+            logoutUser();
+            setCurrentUser(null);
+          }
         }
       });
 
