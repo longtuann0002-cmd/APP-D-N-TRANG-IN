@@ -65,23 +65,13 @@ export const storageManager = {
     }
 
     localStorage.setItem(PROJECTS_KEY, JSON.stringify(list));
-
-    if (isSupabaseConfigured() && supabase) {
-      supabase.from('projects').upsert([project] as any).then(({ error }) => {
-        if (error) console.warn('Supabase sync project error:', error);
-      });
-    }
+    this._syncKeyToCloud('projects', list);
   },
 
   deleteProject(id: string): void {
     const list = this.getProjects().filter(p => p.id !== id);
     localStorage.setItem(PROJECTS_KEY, JSON.stringify(list));
-
-    if (isSupabaseConfigured() && supabase) {
-      supabase.from('projects').delete().eq('id', id).then(({ error }) => {
-        if (error) console.warn('Supabase delete error:', error);
-      });
-    }
+    this._syncKeyToCloud('projects', list);
   },
 
   duplicateProject(id: string): Project | null {
@@ -128,23 +118,13 @@ export const storageManager = {
     }
 
     localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(list));
-
-    if (isSupabaseConfigured() && supabase) {
-      supabase.from('customers').upsert([customer] as any).then(({ error }) => {
-        if (error) console.warn('Supabase customer sync:', error);
-      });
-    }
+    this._syncKeyToCloud('customers', list);
   },
 
   deleteCustomer(id: string): void {
     const list = this.getCustomers().filter(c => c.id !== id);
     localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(list));
-
-    if (isSupabaseConfigured() && supabase) {
-      supabase.from('customers').delete().eq('id', id).then(({ error }) => {
-        if (error) console.warn('Supabase delete customer:', error);
-      });
-    }
+    this._syncKeyToCloud('customers', list);
   },
 
   // --- PRICING ---
@@ -336,6 +316,84 @@ export const storageManager = {
     try {
       localStorage.setItem('caos_studio_shop_info', JSON.stringify(info));
     } catch {}
+  },
+
+  // --- CLOUD SYNC (Supabase app_state table) ---
+
+  /** Internal helper: push one key to app_state table */
+  _syncKeyToCloud(dataKey: string, value: any[]): void {
+    if (!isSupabaseConfigured() || !supabase) return;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      supabase!.from('app_state').upsert(
+        [{ user_id: user.id, data_key: dataKey, data_value: value, updated_at: new Date().toISOString() }],
+        { onConflict: 'user_id,data_key' }
+      ).then(({ error }) => {
+        if (error) console.warn(`Cloud sync [${dataKey}] error:`, error.message);
+      });
+    });
+  },
+
+  /** Pull all data from Supabase and overwrite localStorage */
+  async syncFromCloud(): Promise<{ ok: boolean; projects: number; customers: number; error?: string }> {
+    if (!isSupabaseConfigured() || !supabase) {
+      return { ok: false, projects: 0, customers: 0, error: 'Supabase chưa kết nối' };
+    }
+    try {
+      const { data, error } = await supabase
+        .from('app_state')
+        .select('data_key, data_value');
+
+      if (error) return { ok: false, projects: 0, customers: 0, error: error.message };
+
+      let projectsCount = 0;
+      let customersCount = 0;
+
+      if (data) {
+        for (const row of data) {
+          if (row.data_key === 'projects' && Array.isArray(row.data_value)) {
+            localStorage.setItem(PROJECTS_KEY, JSON.stringify(row.data_value));
+            projectsCount = row.data_value.length;
+          }
+          if (row.data_key === 'customers' && Array.isArray(row.data_value)) {
+            if (row.data_value.length > 0) {
+              localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(row.data_value));
+              customersCount = row.data_value.length;
+            }
+          }
+        }
+      }
+
+      return { ok: true, projects: projectsCount, customers: customersCount };
+    } catch (err: any) {
+      return { ok: false, projects: 0, customers: 0, error: err?.message || 'Lỗi không xác định' };
+    }
+  },
+
+  /** Push all local data up to Supabase (first-time setup or force sync) */
+  async pushAllToCloud(): Promise<boolean> {
+    if (!isSupabaseConfigured() || !supabase) return false;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      const projects = this.getProjects();
+      const customers = this.getCustomers();
+
+      const { error } = await supabase.from('app_state').upsert(
+        [
+          { user_id: user.id, data_key: 'projects', data_value: projects, updated_at: new Date().toISOString() },
+          { user_id: user.id, data_key: 'customers', data_value: customers, updated_at: new Date().toISOString() }
+        ],
+        { onConflict: 'user_id,data_key' }
+      );
+
+      if (error) { console.warn('pushAllToCloud error:', error.message); return false; }
+      return true;
+    } catch (err) {
+      console.warn('pushAllToCloud exception:', err);
+      return false;
+    }
   }
 };
 

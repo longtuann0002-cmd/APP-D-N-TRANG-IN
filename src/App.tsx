@@ -959,9 +959,20 @@ export function App() {
   if (!currentUser) {
     return (
       <AuthGate
-        onLoginSuccess={(user) => {
+        onLoginSuccess={async (user) => {
           setCurrentUser(user);
           setSupabaseConnected(isSupabaseConfigured());
+          // Sync data from Supabase cloud after login
+          if (isSupabaseConfigured()) {
+            const result = await storageManager.syncFromCloud();
+            if (result.ok) {
+              setProjects(storageManager.getProjects());
+              setCustomers(storageManager.getCustomers());
+            } else {
+              // No cloud data yet → push local data up to cloud
+              await storageManager.pushAllToCloud();
+            }
+          }
         }}
         shopInfo={shopInfo}
       />
