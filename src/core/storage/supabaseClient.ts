@@ -177,17 +177,39 @@ export async function loginWithGoogle(): Promise<{ error?: string }> {
   }
 
   try {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin
+        redirectTo: window.location.origin,
+        skipBrowserRedirect: true
       }
     });
 
     if (error) {
       return { error: error.message };
     }
-    return {};
+
+    if (data?.url) {
+      // Pre-check if Google provider is enabled to prevent raw black JSON error page
+      try {
+        const check = await fetch(data.url, { method: 'GET' });
+        if (!check.ok) {
+          const json = await check.json().catch(() => null);
+          if (json?.msg?.includes('provider is not enabled') || json?.error_code === 'validation_failed') {
+            return {
+              error: '⚠️ Dự án Supabase của bạn chưa bật tính năng Đăng nhập Google. Bạn vui lòng sử dụng Email & Mật khẩu bên trên để đăng nhập ngay!'
+            };
+          }
+        }
+      } catch {
+        // If blocked by CORS or redirects, continue with normal window redirect
+      }
+
+      window.location.href = data.url;
+      return {};
+    }
+
+    return { error: 'Không lấy được đường dẫn đăng nhập Google.' };
   } catch (err: any) {
     return { error: err.message || 'Lỗi kết nối Google OAuth.' };
   }

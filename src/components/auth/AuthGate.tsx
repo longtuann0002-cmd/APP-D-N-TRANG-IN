@@ -66,7 +66,14 @@ export const AuthGate: React.FC<AuthGateProps> = ({
       const res = await loginWithSupabase(email, password);
       setIsLoading(false);
       if (res.error) {
-        setAuthMsg({ type: 'error', text: 'Đăng nhập thất bại: ' + res.error });
+        if (res.error.toLowerCase().includes('invalid login credentials')) {
+          setAuthMsg({ 
+            type: 'error', 
+            text: 'Email hoặc mật khẩu chưa chính xác. Nếu chưa có tài khoản, bạn hãy bấm tab "Đăng ký tiệm" bên cạnh để tạo tài khoản mới ngay!' 
+          });
+        } else {
+          setAuthMsg({ type: 'error', text: 'Đăng nhập thất bại: ' + res.error });
+        }
       } else if (res.user) {
         setAuthMsg({ type: 'success', text: `Chào mừng ${res.user.fullName} đã đăng nhập!` });
         setTimeout(() => onLoginSuccess(res.user!), 600);
@@ -104,6 +111,8 @@ export const AuthGate: React.FC<AuthGateProps> = ({
       setTimeout(() => onLoginSuccess(res.user!), 700);
     } else if (res.message) {
       setAuthMsg({ type: 'info', text: res.message });
+      // Switch back to login tab after 2.5s
+      setTimeout(() => setActiveTab('login'), 2500);
     }
   };
 
