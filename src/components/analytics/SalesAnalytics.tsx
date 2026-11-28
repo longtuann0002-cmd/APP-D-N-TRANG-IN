@@ -132,8 +132,7 @@ export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
 
   return (
     <div 
-      className="flex-1 h-full bg-studio-bg overflow-y-auto p-4 md:p-8 pb-28 md:pb-8 md:pt-8 select-none"
-      style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
+      className="safe-area-top-page flex-1 h-full bg-studio-bg overflow-y-auto p-4 md:p-8 pb-28 md:pb-8 md:pt-8 select-none"
     >
       <div className="max-w-4xl mx-auto space-y-6">
         
