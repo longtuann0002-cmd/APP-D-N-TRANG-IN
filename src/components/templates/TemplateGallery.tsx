@@ -204,13 +204,6 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
       {/* Header — Responsive for Mobile & Desktop */}
       <div 
         className="safe-area-top-header relative z-20 border-b border-studio-border px-4 md:px-8 py-2 md:py-3 md:h-16 flex flex-col md:flex-row md:items-center justify-between shrink-0 gap-3"
-        style={{ 
-          paddingTop: 'max(env(safe-area-inset-top, 0px), 8px)',
-          backgroundColor: '#ffffff',
-          isolation: 'isolate',
-          WebkitBackfaceVisibility: 'hidden',
-          transform: 'translateZ(0)'
-        }}
       >
         <div>
           <div className="flex items-center gap-2">

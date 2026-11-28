@@ -1059,13 +1059,6 @@ export function App() {
         {activeTab === 'orders' && (
           <header 
             className="safe-area-top-header relative z-30 flex md:hidden flex-col border-b border-stone-200 shrink-0"
-            style={{ 
-              paddingTop: 'max(env(safe-area-inset-top, 0px), 8px)',
-              backgroundColor: '#ffffff', 
-              isolation: 'isolate', 
-              WebkitBackfaceVisibility: 'hidden', 
-              transform: 'translateZ(0)' 
-            }}
           >
             {/* Row 1: Brand & Search */}
             <div className="flex items-center justify-between px-4 pt-1 pb-2">

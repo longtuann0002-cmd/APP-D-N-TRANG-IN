@@ -61,11 +61,14 @@ body {
 
 /* Bulletproof Native Safe-Area Utilities */
 .safe-area-top-header {
-  padding-top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
-  background-color: #ffffff !important;
-  isolation: isolate !important;
-  -webkit-backface-visibility: hidden !important;
-  transform: translateZ(0) !important;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
+  background-color: #ffffff;
+}
+
+@media (max-width: 767px) {
+  .safe-area-top-header {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 18px) !important;
+  }
 }
 
 .safe-area-bottom-bar {
