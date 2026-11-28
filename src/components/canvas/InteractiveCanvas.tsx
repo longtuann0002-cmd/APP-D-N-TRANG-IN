@@ -54,6 +54,7 @@ interface PageCanvasProps {
   dragOverSlotId: string | null;
   onSelectPage: (idx: number) => void;
   onSelectSlot: (slotId: string | null) => void;
+  onDoubleClickSlot?: (slotId: string) => void;
   onHoverSlot: (slotId: string | null) => void;
   onDragOverSlot: (slotId: string | null) => void;
   onDropPhoto: (slotId: string, photoId: string) => void;
@@ -73,6 +74,7 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
   dragOverSlotId,
   onSelectPage,
   onSelectSlot,
+  onDoubleClickSlot,
   onHoverSlot,
   onDragOverSlot,
   onDropPhoto,
@@ -154,6 +156,15 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
     onSelectSlot(slotId);
   };
 
+  const handleDoubleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    onSelectPage(pageIndex);
+    const slotId = getSlotAtPoint(e.clientX, e.clientY);
+    if (slotId) {
+      onSelectSlot(slotId);
+      onDoubleClickSlot?.(slotId);
+    }
+  };
+
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const slotId = getSlotAtPoint(e.clientX, e.clientY);
     if (slotId !== hoveredSlotId) {
@@ -208,6 +219,7 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
         <canvas
           ref={canvasRef}
           onClick={handleClick}
+          onDoubleClick={handleDoubleClick}
           onTouchEnd={(e) => {
             if (e.changedTouches && e.changedTouches.length > 0) {
               const touch = e.changedTouches[0];
@@ -592,6 +604,7 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
                 dragOverSlotId={dragOverSlotId}
                 onSelectPage={onSelectPageIndex}
                 onSelectSlot={onSelectSlot}
+                onDoubleClickSlot={onAdjustCropInSlot}
                 onHoverSlot={setHoveredSlotId}
                 onDragOverSlot={setDragOverSlotId}
                 onDropPhoto={onDropPhotoOnSlot}
