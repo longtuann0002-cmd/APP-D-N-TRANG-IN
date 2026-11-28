@@ -14,9 +14,21 @@ const STORAGE_KEY_USER = 'caos_studio_current_user';
 const STORAGE_KEY_URL = 'photodesk_supabase_url';
 const STORAGE_KEY_KEY = 'photodesk_supabase_key';
 
+/**
+ * Clean up Supabase URL: remove trailing /rest/v1/, /auth/v1/ and slashes
+ */
+export function sanitizeSupabaseUrl(rawUrl: string): string {
+  if (!rawUrl) return '';
+  let url = rawUrl.trim();
+  url = url.replace(/\/rest\/v1\/?$/i, '');
+  url = url.replace(/\/auth\/v1\/?$/i, '');
+  url = url.replace(/\/+$/, '');
+  return url;
+}
+
 // Retrieve from environment variables or custom local storage settings
-const defaultUrl = import.meta.env.VITE_SUPABASE_URL || localStorage.getItem(STORAGE_KEY_URL) || '';
-const defaultAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || localStorage.getItem(STORAGE_KEY_KEY) || '';
+const defaultUrl = sanitizeSupabaseUrl(import.meta.env.VITE_SUPABASE_URL || localStorage.getItem(STORAGE_KEY_URL) || '');
+const defaultAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || localStorage.getItem(STORAGE_KEY_KEY) || '').trim();
 
 export let supabase: SupabaseClient | null = null;
 
@@ -28,8 +40,11 @@ if (defaultUrl && defaultAnonKey) {
   }
 }
 
-export function initSupabase(url: string, key: string): boolean {
+export function initSupabase(rawUrl: string, rawKey: string): boolean {
   try {
+    const url = sanitizeSupabaseUrl(rawUrl);
+    const key = rawKey.trim();
+
     if (!url || !key) {
       supabase = null;
       localStorage.removeItem(STORAGE_KEY_URL);

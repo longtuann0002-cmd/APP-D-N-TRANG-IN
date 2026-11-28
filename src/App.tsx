@@ -35,6 +35,7 @@ import { PricingManager } from './components/pricing/PricingManager';
 import { SalesAnalytics } from './components/analytics/SalesAnalytics';
 import { PrinterCalibrationModal } from './components/calibration/PrinterCalibrationModal';
 import { AuthModal } from './components/auth/AuthModal';
+import { AuthGate } from './components/auth/AuthGate';
 import { ExportModal } from './components/export/ExportModal';
 import { PhotoCropAdjustModal } from './components/media/PhotoCropAdjustModal';
 import { PhotoFilterModal } from './components/media/PhotoFilterModal';
@@ -907,6 +908,19 @@ export function App() {
   };
 
   const currentPage = activeProject?.pages[currentPageIndex] || activeProject?.pages[0];
+
+  // If user is not authenticated, show full-screen secure AuthGate
+  if (!currentUser) {
+    return (
+      <AuthGate
+        onLoginSuccess={(user) => {
+          setCurrentUser(user);
+          setSupabaseConnected(isSupabaseConfigured());
+        }}
+        shopInfo={shopInfo}
+      />
+    );
+  }
 
   return (
     <div className="flex h-[100dvh] w-screen overflow-hidden bg-studio-bg font-sans antialiased text-stone-800">
