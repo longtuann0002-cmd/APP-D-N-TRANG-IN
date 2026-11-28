@@ -309,6 +309,50 @@ export function App() {
     }
   }, [supabaseConnected]);
 
+  // Sync data with Supabase Cloud (pull if cloud has data, otherwise push local data up)
+  const lastSyncRef = useRef<number>(0);
+
+  const refreshStateFromStorage = useCallback(() => {
+    const latestProjects = storageManager.getProjects();
+    setProjects(latestProjects);
+    setCustomers(storageManager.getCustomers());
+    setPriceSettings(storageManager.getPriceSettings());
+    setShopInfo(storageManager.getShopInfo());
+    setActiveProject(prev => {
+      if (!prev) return latestProjects[0] || null;
+      const updated = latestProjects.find(p => p.id === prev.id);
+      return updated || latestProjects[0] || null;
+    });
+  }, []);
+
+  const syncCloudData = useCallback(async (force = false) => {
+    if (!isSupabaseConfigured()) return;
+    const now = Date.now();
+    if (!force && now - lastSyncRef.current < 8000) return;
+    lastSyncRef.current = now;
+
+    const result = await storageManager.syncFromCloud();
+    if (result.ok) {
+      if (result.hasCloudData) {
+        refreshStateFromStorage();
+      } else {
+        await storageManager.pushAllToCloud();
+      }
+    }
+  }, [refreshStateFromStorage]);
+
+  // Auto-sync on startup / session restore and when returning to the tab
+  useEffect(() => {
+    if (!currentUser?.isCloud || !supabaseConnected) return;
+    syncCloudData(true);
+
+    const handleFocus = () => {
+      syncCloudData(false);
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [currentUser?.id, currentUser?.isCloud, supabaseConnected, syncCloudData]);
+
   // Map of loaded photos for fast canvas lookup
   const photosMap = useMemo(() => {
     const map = new Map<string, PhotoItem>();
@@ -962,17 +1006,7 @@ export function App() {
         onLoginSuccess={async (user) => {
           setCurrentUser(user);
           setSupabaseConnected(isSupabaseConfigured());
-          // Sync data from Supabase cloud after login
-          if (isSupabaseConfigured()) {
-            const result = await storageManager.syncFromCloud();
-            if (result.ok) {
-              setProjects(storageManager.getProjects());
-              setCustomers(storageManager.getCustomers());
-            } else {
-              // No cloud data yet → push local data up to cloud
-              await storageManager.pushAllToCloud();
-            }
-          }
+          await syncCloudData(true);
         }}
         shopInfo={shopInfo}
       />

@@ -89,6 +89,7 @@ export const storageManager = {
 
     list.unshift(copy);
     localStorage.setItem(PROJECTS_KEY, JSON.stringify(list));
+    this._syncKeyToCloud('projects', list);
     return copy;
   },
 
@@ -139,6 +140,7 @@ export const storageManager = {
 
   savePriceSettings(settings: PriceSetting[]): void {
     localStorage.setItem(PRICES_KEY, JSON.stringify(settings));
+    this._syncKeyToCloud('prices', settings);
   },
 
   getTieredPricingRules(): SizePricingRule[] {
@@ -152,6 +154,7 @@ export const storageManager = {
 
   saveTieredPricingRules(rules: SizePricingRule[]): void {
     localStorage.setItem(TIERED_PRICES_KEY, JSON.stringify(rules));
+    this._syncKeyToCloud('tiered_prices', rules);
   },
 
   getLaminationPricingSettings(): {
@@ -186,6 +189,7 @@ export const storageManager = {
     glitter50Plus: number;
   }): void {
     localStorage.setItem(LAMINATION_PRICES_KEY, JSON.stringify(settings));
+    this._syncKeyToCloud('lamination_prices', settings);
   },
 
   // --- PRINTER CALIBRATION ---
@@ -271,6 +275,7 @@ export const storageManager = {
       customList.unshift(template);
     }
     localStorage.setItem(TEMPLATES_KEY, JSON.stringify(customList));
+    this._syncKeyToCloud('templates', customList);
   },
 
   deleteTemplate(id: string): void {
@@ -280,12 +285,16 @@ export const storageManager = {
     // Add to blacklist (handles both built-in and custom templates)
     const deletedIds = this.getDeletedTemplateIds();
     deletedIds.add(id);
-    localStorage.setItem(DELETED_TEMPLATES_KEY, JSON.stringify([...deletedIds]));
+    const deletedArray = [...deletedIds];
+    localStorage.setItem(DELETED_TEMPLATES_KEY, JSON.stringify(deletedArray));
+    this._syncKeyToCloud('templates', customList);
+    this._syncKeyToCloud('deleted_templates', deletedArray);
   },
 
   restoreAllTemplates(): void {
     // Clear blacklist to restore all built-in templates
     localStorage.removeItem(DELETED_TEMPLATES_KEY);
+    this._syncKeyToCloud('deleted_templates', []);
   },
 
   getCustomTemplatesList(): TemplateItem[] {
@@ -315,15 +324,17 @@ export const storageManager = {
   saveShopInfo(info: { name: string; tagline: string; logoUrl?: string }): void {
     try {
       localStorage.setItem('caos_studio_shop_info', JSON.stringify(info));
+      this._syncKeyToCloud('shop_info', info);
     } catch {}
   },
 
   // --- CLOUD SYNC (Supabase app_state table) ---
 
   /** Internal helper: push one key to app_state table */
-  _syncKeyToCloud(dataKey: string, value: any[]): void {
+  _syncKeyToCloud(dataKey: string, value: unknown): void {
     if (!isSupabaseConfigured() || !supabase) return;
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const user = session?.user;
       if (!user) return;
       supabase!.from('app_state').upsert(
         [{ user_id: user.id, data_key: dataKey, data_value: value, updated_at: new Date().toISOString() }],
@@ -335,38 +346,73 @@ export const storageManager = {
   },
 
   /** Pull all data from Supabase and overwrite localStorage */
-  async syncFromCloud(): Promise<{ ok: boolean; projects: number; customers: number; error?: string }> {
+  async syncFromCloud(): Promise<{ ok: boolean; hasCloudData: boolean; projects: number; customers: number; error?: string }> {
     if (!isSupabaseConfigured() || !supabase) {
-      return { ok: false, projects: 0, customers: 0, error: 'Supabase chưa kết nối' };
+      return { ok: false, hasCloudData: false, projects: 0, customers: 0, error: 'Supabase chưa kết nối' };
     }
     try {
       const { data, error } = await supabase
         .from('app_state')
         .select('data_key, data_value');
 
-      if (error) return { ok: false, projects: 0, customers: 0, error: error.message };
+      if (error) return { ok: false, hasCloudData: false, projects: 0, customers: 0, error: error.message };
 
       let projectsCount = 0;
       let customersCount = 0;
+      const hasCloudData = Array.isArray(data) && data.length > 0;
 
       if (data) {
         for (const row of data) {
-          if (row.data_key === 'projects' && Array.isArray(row.data_value)) {
-            localStorage.setItem(PROJECTS_KEY, JSON.stringify(row.data_value));
-            projectsCount = row.data_value.length;
-          }
-          if (row.data_key === 'customers' && Array.isArray(row.data_value)) {
-            if (row.data_value.length > 0) {
-              localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(row.data_value));
-              customersCount = row.data_value.length;
-            }
+          switch (row.data_key) {
+            case 'projects':
+              if (Array.isArray(row.data_value)) {
+                localStorage.setItem(PROJECTS_KEY, JSON.stringify(row.data_value));
+                projectsCount = row.data_value.length;
+              }
+              break;
+            case 'customers':
+              if (Array.isArray(row.data_value) && row.data_value.length > 0) {
+                localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(row.data_value));
+                customersCount = row.data_value.length;
+              }
+              break;
+            case 'templates':
+              if (Array.isArray(row.data_value)) {
+                localStorage.setItem(TEMPLATES_KEY, JSON.stringify(row.data_value));
+              }
+              break;
+            case 'deleted_templates':
+              if (Array.isArray(row.data_value)) {
+                localStorage.setItem(DELETED_TEMPLATES_KEY, JSON.stringify(row.data_value));
+              }
+              break;
+            case 'prices':
+              if (Array.isArray(row.data_value)) {
+                localStorage.setItem(PRICES_KEY, JSON.stringify(row.data_value));
+              }
+              break;
+            case 'tiered_prices':
+              if (Array.isArray(row.data_value)) {
+                localStorage.setItem(TIERED_PRICES_KEY, JSON.stringify(row.data_value));
+              }
+              break;
+            case 'lamination_prices':
+              if (row.data_value && typeof row.data_value === 'object') {
+                localStorage.setItem(LAMINATION_PRICES_KEY, JSON.stringify(row.data_value));
+              }
+              break;
+            case 'shop_info':
+              if (row.data_value && typeof row.data_value === 'object') {
+                localStorage.setItem('caos_studio_shop_info', JSON.stringify(row.data_value));
+              }
+              break;
           }
         }
       }
 
-      return { ok: true, projects: projectsCount, customers: customersCount };
+      return { ok: true, hasCloudData, projects: projectsCount, customers: customersCount };
     } catch (err: any) {
-      return { ok: false, projects: 0, customers: 0, error: err?.message || 'Lỗi không xác định' };
+      return { ok: false, hasCloudData: false, projects: 0, customers: 0, error: err?.message || 'Lỗi không xác định' };
     }
   },
 
@@ -374,19 +420,23 @@ export const storageManager = {
   async pushAllToCloud(): Promise<boolean> {
     if (!isSupabaseConfigured() || !supabase) return false;
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return false;
 
-      const projects = this.getProjects();
-      const customers = this.getCustomers();
+      const now = new Date().toISOString();
+      const rows = [
+        { user_id: user.id, data_key: 'projects', data_value: this.getProjects(), updated_at: now },
+        { user_id: user.id, data_key: 'customers', data_value: this.getCustomers(), updated_at: now },
+        { user_id: user.id, data_key: 'templates', data_value: this.getCustomTemplatesList(), updated_at: now },
+        { user_id: user.id, data_key: 'deleted_templates', data_value: [...this.getDeletedTemplateIds()], updated_at: now },
+        { user_id: user.id, data_key: 'prices', data_value: this.getPriceSettings(), updated_at: now },
+        { user_id: user.id, data_key: 'tiered_prices', data_value: this.getTieredPricingRules(), updated_at: now },
+        { user_id: user.id, data_key: 'lamination_prices', data_value: this.getLaminationPricingSettings(), updated_at: now },
+        { user_id: user.id, data_key: 'shop_info', data_value: this.getShopInfo(), updated_at: now }
+      ];
 
-      const { error } = await supabase.from('app_state').upsert(
-        [
-          { user_id: user.id, data_key: 'projects', data_value: projects, updated_at: new Date().toISOString() },
-          { user_id: user.id, data_key: 'customers', data_value: customers, updated_at: new Date().toISOString() }
-        ],
-        { onConflict: 'user_id,data_key' }
-      );
+      const { error } = await supabase.from('app_state').upsert(rows, { onConflict: 'user_id,data_key' });
 
       if (error) { console.warn('pushAllToCloud error:', error.message); return false; }
       return true;
