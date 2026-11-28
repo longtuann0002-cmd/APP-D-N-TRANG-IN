@@ -600,6 +600,11 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
   const [hoveredSlotId, setHoveredSlotId] = useState<string | null>(null);
   const [dragOverSlotId, setDragOverSlotId] = useState<string | null>(null);
   const [inlineCropSlotId, setInlineCropSlotId] = useState<string | null>(null);
+  const inlineCropSlotIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    inlineCropSlotIdRef.current = inlineCropSlotId;
+  }, [inlineCropSlotId]);
 
   useEffect(() => {
     if (inlineCropSlotId && selectedSlotId !== inlineCropSlotId) {
@@ -725,10 +730,11 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
       const isMiddle = e.button === 1;
       const isLeft = e.button === 0;
       const target = e.target as HTMLElement;
-      // Only block for interactive UI controls
+      // Only block for interactive UI controls, or left-click pan while inline image crop/resize is active
       const isBlockedControl = !!target.closest('button') || !!target.closest('select') || !!target.closest('input');
+      const isInlineCropBlockingLeftPan = isLeft && !!inlineCropSlotIdRef.current && !isSpacePressedRef.current;
 
-      if ((isMiddle || isLeft) && !isBlockedControl) {
+      if ((isMiddle || (isLeft && !isInlineCropBlockingLeftPan)) && !isBlockedControl) {
         isPanningRef.current = false;
         scrollChangedSignificantly = false;
         panStartRef.current = {
