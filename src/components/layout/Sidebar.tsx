@@ -10,8 +10,11 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
-  Database
+  Database,
+  Cloud,
+  CloudOff
 } from 'lucide-react';
+import { UserProfile } from '../../core/storage/supabaseClient';
 
 export type ActiveTab = 'orders' | 'editor' | 'templates' | 'customers' | 'pricing' | 'analytics' | 'calibration';
 
@@ -26,6 +29,7 @@ interface SidebarProps {
   isSupabaseConnected: boolean;
   shopInfo?: { name: string; tagline: string; logoUrl?: string };
   onOpenEditLogo?: () => void;
+  currentUser?: UserProfile | null;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -38,7 +42,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenAuth,
   isSupabaseConnected,
   shopInfo,
-  onOpenEditLogo
+  onOpenEditLogo,
+  currentUser
 }) => {
   const menuItems = [
     { id: 'orders' as ActiveTab, label: 'Đơn hàng', icon: Layers, badge: orderCount > 0 ? orderCount : undefined },
@@ -118,14 +123,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Bottom Section */}
       <div className="p-2 border-t border-studio-border/60 space-y-2">
-        {/* Studio Info card */}
+        {/* Studio Info / User card */}
         {!collapsed && (
-          <div className="bg-stone-50 border border-stone-200/80 rounded-lg p-2.5">
+          <div 
+            onClick={onOpenAuth}
+            className="bg-stone-50 hover:bg-stone-100/90 border border-stone-200/80 rounded-xl p-2.5 cursor-pointer transition group shadow-2xs"
+            title="Nhấn để xem thông tin tài khoản"
+          >
             <div className="flex items-center justify-between text-xs font-semibold text-stone-800 mb-0.5">
-              <span>PhotoDesk Studio</span>
-              <span className="text-[10px] text-emerald-600 font-bold">Mở khóa 100%</span>
+              <span className="truncate max-w-[105px]">
+                {currentUser ? currentUser.fullName : 'Caos Studio'}
+              </span>
+              <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-full ${
+                currentUser 
+                  ? (currentUser.isCloud ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700') 
+                  : 'bg-stone-200 text-stone-600'
+              }`}>
+                {currentUser ? (currentUser.isCloud ? 'Cloud' : 'Offline') : 'Chưa đăng nhập'}
+              </span>
             </div>
-            <p className="text-[10px] text-stone-500">Đầy đủ tính năng in ấn & xuất PDF/JPG</p>
+            <p className="text-[10px] text-stone-500 truncate">
+              {currentUser ? currentUser.email : 'Nhấn để đăng nhập tiệm'}
+            </p>
           </div>
         )}
 

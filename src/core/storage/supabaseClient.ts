@@ -1,8 +1,22 @@
 ﻿import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  fullName: string;
+  role: 'owner' | 'staff';
+  isCloud: boolean;
+  avatarUrl?: string;
+  lastLogin?: string;
+}
+
+const STORAGE_KEY_USER = 'caos_studio_current_user';
+const STORAGE_KEY_URL = 'photodesk_supabase_url';
+const STORAGE_KEY_KEY = 'photodesk_supabase_key';
+
 // Retrieve from environment variables or custom local storage settings
-const defaultUrl = import.meta.env.VITE_SUPABASE_URL || localStorage.getItem('photodesk_supabase_url') || '';
-const defaultAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || localStorage.getItem('photodesk_supabase_key') || '';
+const defaultUrl = import.meta.env.VITE_SUPABASE_URL || localStorage.getItem(STORAGE_KEY_URL) || '';
+const defaultAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || localStorage.getItem(STORAGE_KEY_KEY) || '';
 
 export let supabase: SupabaseClient | null = null;
 
@@ -18,13 +32,13 @@ export function initSupabase(url: string, key: string): boolean {
   try {
     if (!url || !key) {
       supabase = null;
-      localStorage.removeItem('photodesk_supabase_url');
-      localStorage.removeItem('photodesk_supabase_key');
+      localStorage.removeItem(STORAGE_KEY_URL);
+      localStorage.removeItem(STORAGE_KEY_KEY);
       return false;
     }
     supabase = createClient(url, key);
-    localStorage.setItem('photodesk_supabase_url', url);
-    localStorage.setItem('photodesk_supabase_key', key);
+    localStorage.setItem(STORAGE_KEY_URL, url);
+    localStorage.setItem(STORAGE_KEY_KEY, key);
     return true;
   } catch (err) {
     console.error('Failed to initialize Supabase:', err);
@@ -34,4 +48,157 @@ export function initSupabase(url: string, key: string): boolean {
 
 export function isSupabaseConfigured(): boolean {
   return supabase !== null;
+}
+
+// -------------------------------------------------------------
+// USER SESSION MANAGEMENT
+// -------------------------------------------------------------
+
+/**
+ * Get the currently logged-in user (from local storage or default null)
+ */
+export function getCurrentUser(): UserProfile | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_USER);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Save user profile to local session
+ */
+export function saveUserSession(user: UserProfile): void {
+  try {
+    localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
+  } catch (err) {
+    console.error('Failed to save user session:', err);
+  }
+}
+
+/**
+ * Clear user session (logout)
+ */
+export async function logoutUser(): Promise<void> {
+  try {
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+  } catch (err) {
+    console.warn('Supabase signout warning:', err);
+  }
+  localStorage.removeItem(STORAGE_KEY_USER);
+}
+
+/**
+ * Quick Demo / Offline Login for testing without configuring Supabase upfront
+ */
+export function loginDemoUser(
+  email: string = 'chutiem@caosprint.vn',
+  name: string = 'Chủ Tiệm Caos',
+  role: 'owner' | 'staff' = 'owner'
+): UserProfile {
+  const profile: UserProfile = {
+    id: 'demo-' + Date.now(),
+    email: email.trim().toLowerCase(),
+    fullName: name.trim() || 'Chủ Tiệm Caos',
+    role,
+    isCloud: isSupabaseConfigured(),
+    lastLogin: new Date().toISOString()
+  };
+  saveUserSession(profile);
+  return profile;
+}
+
+/**
+ * Login with Supabase Cloud
+ */
+export async function loginWithSupabase(
+  email: string,
+  password: string
+): Promise<{ user: UserProfile | null; error?: string }> {
+  if (!supabase) {
+    return { user: null, error: 'Chưa cấu hình kết nối Supabase Cloud.' };
+  }
+
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password
+    });
+
+    if (error) {
+      return { user: null, error: error.message };
+    }
+
+    if (!data.user) {
+      return { user: null, error: 'Không nhận được thông tin người dùng.' };
+    }
+
+    const profile: UserProfile = {
+      id: data.user.id,
+      email: data.user.email || email,
+      fullName: data.user.user_metadata?.full_name || email.split('@')[0],
+      role: (data.user.user_metadata?.role as 'owner' | 'staff') || 'owner',
+      isCloud: true,
+      lastLogin: new Date().toISOString()
+    };
+
+    saveUserSession(profile);
+    return { user: profile };
+  } catch (err: any) {
+    return { user: null, error: err.message || 'Lỗi đăng nhập không xác định.' };
+  }
+}
+
+/**
+ * Sign up with Supabase Cloud
+ */
+export async function signUpWithSupabase(
+  email: string,
+  password: string,
+  fullName: string = ''
+): Promise<{ user: UserProfile | null; error?: string; message?: string }> {
+  if (!supabase) {
+    return { user: null, error: 'Chưa cấu hình kết nối Supabase Cloud.' };
+  }
+
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: {
+        data: {
+          full_name: fullName.trim() || email.split('@')[0],
+          role: 'owner'
+        }
+      }
+    });
+
+    if (error) {
+      return { user: null, error: error.message };
+    }
+
+    if (data.session && data.user) {
+      const profile: UserProfile = {
+        id: data.user.id,
+        email: data.user.email || email,
+        fullName: fullName.trim() || email.split('@')[0],
+        role: 'owner',
+        isCloud: true,
+        lastLogin: new Date().toISOString()
+      };
+      saveUserSession(profile);
+      return { user: profile, message: 'Đăng ký và đăng nhập thành công!' };
+    }
+
+    return {
+      user: null,
+      message: 'Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản nếu Supabase yêu cầu xác thực email.'
+    };
+  } catch (err: any) {
+    return { user: null, error: err.message || 'Lỗi đăng ký không xác định.' };
+  }
 }

@@ -13,7 +13,7 @@ import {
 } from './types';
 import { storageManager } from './core/storage/storageManager';
 import { computeLayout } from './core/layout/layoutEngine';
-import { isSupabaseConfigured } from './core/storage/supabaseClient';
+import { isSupabaseConfigured, getCurrentUser, UserProfile } from './core/storage/supabaseClient';
 import { getDemoPhotos } from './core/image/samplePhotos';
 import { restoreProjectPhotos } from './core/image/imageProcessor';
 import { deletePhotoBlob, clearProjectBlobs } from './core/storage/indexedDbStorage';
@@ -258,8 +258,9 @@ export function App() {
   const [history, setHistory] = useState<Project[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
-  // Check Supabase connection state
+  // Check Supabase connection state & User Auth Session
   const [supabaseConnected, setSupabaseConnected] = useState(() => isSupabaseConfigured());
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => getCurrentUser());
 
   // Map of loaded photos for fast canvas lookup
   const photosMap = useMemo(() => {
@@ -925,6 +926,7 @@ export function App() {
         isSupabaseConnected={supabaseConnected}
         shopInfo={shopInfo}
         onOpenEditLogo={() => setIsEditLogoModalOpen(true)}
+        currentUser={currentUser}
       />
 
       {/* Main Work Area */}
@@ -974,9 +976,23 @@ export function App() {
                 />
                 <button
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="w-8 h-8 rounded-full bg-stone-100 border border-stone-300 flex items-center justify-center active:scale-90 transition text-stone-800"
+                  className={`w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition relative ${
+                    currentUser 
+                      ? 'bg-stone-900 text-white font-bold text-xs border border-stone-800 shadow-2xs' 
+                      : 'bg-stone-100 border border-stone-300 text-stone-800'
+                  }`}
+                  title={currentUser ? `Tài khoản: ${currentUser.fullName}` : 'Đăng nhập tài khoản tiệm'}
                 >
-                  <span className="text-sm">👤</span>
+                  {currentUser ? (
+                    <span>{currentUser.fullName ? currentUser.fullName.charAt(0).toUpperCase() : 'C'}</span>
+                  ) : (
+                    <span className="text-sm">👤</span>
+                  )}
+                  {currentUser && (
+                    <span className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-white ${
+                      currentUser.isCloud ? 'bg-emerald-500' : 'bg-amber-400'
+                    }`} />
+                  )}
                 </button>
               </div>
             </div>
@@ -1018,6 +1034,7 @@ export function App() {
               onOpenAuth={() => setIsAuthModalOpen(true)}
               statusCounts={statusCounts}
               isSupabaseConnected={supabaseConnected}
+              currentUser={currentUser}
             />
           </div>
         )}
@@ -1447,6 +1464,8 @@ export function App() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+        currentUser={currentUser}
+        onUserChanged={setCurrentUser}
         onConfigChanged={() => {
           setSupabaseConnected(isSupabaseConfigured());
         }}
