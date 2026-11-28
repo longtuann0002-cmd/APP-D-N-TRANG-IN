@@ -118,7 +118,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const result = await loginWithSupabase(email, password);
       setIsLoading(false);
       if (result.error) {
-        setAuthMsg({ type: 'error', text: 'Đăng nhập thất bại: ' + result.error });
+        const errLower = result.error.toLowerCase();
+        if (errLower.includes('email not confirmed')) {
+          setAuthMsg({ 
+            type: 'error', 
+            text: 'Tài khoản chưa được kích hoạt. Vui lòng báo Chủ Tiệm vào Supabase bấm "Confirm User" để duyệt tài khoản.' 
+          });
+        } else if (errLower.includes('invalid login credentials')) {
+          setAuthMsg({ 
+            type: 'error', 
+            text: 'Email hoặc mật khẩu chưa chính xác. Hệ thống nội bộ chỉ dành cho tài khoản được Chủ Tiệm cấp quyền.' 
+          });
+        } else {
+          setAuthMsg({ type: 'error', text: 'Đăng nhập thất bại: ' + result.error });
+        }
       } else if (result.user) {
         onUserChanged(result.user);
         setAuthMsg({ type: 'success', text: `Chào mừng ${result.user.fullName} đã đăng nhập!` });
@@ -128,7 +141,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setIsLoading(false);
       setAuthMsg({ 
         type: 'error', 
-        text: 'Chưa kết nối Supabase Cloud. Vui lòng kiểm tra tab Cloud để kết nối.' 
+        text: 'Chưa kết nối Supabase Cloud. Vui lòng kiểm tra tab Cấu hình Cloud.' 
       });
     }
   };
@@ -372,23 +385,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       : 'text-stone-500 hover:text-stone-900'
                   }`}
                 >
-                  Đăng nhập
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('signup')}
-                  className={`flex-1 py-2 font-bold rounded-xl transition text-center ${
-                    activeTab === 'signup'
-                      ? 'bg-white text-stone-900 shadow-xs'
-                      : 'text-stone-500 hover:text-stone-900'
-                  }`}
-                >
-                  Đăng ký tiệm
+                  Đăng nhập tiệm
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('supabase')}
-                  className={`px-3 py-2 font-semibold rounded-xl transition text-center flex items-center gap-1 shrink-0 ${
+                  className={`flex-1 py-2 font-bold rounded-xl transition text-center flex items-center justify-center gap-1.5 ${
                     activeTab === 'supabase'
                       ? 'bg-white text-stone-900 shadow-xs'
                       : 'text-stone-500 hover:text-stone-900'
@@ -396,7 +398,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   title="Cấu hình kết nối Supabase Cloud"
                 >
                   <Settings2 className="w-3.5 h-3.5" />
-                  <span>Cloud</span>
+                  <span>Cấu hình Cloud</span>
                 </button>
               </div>
 
@@ -414,27 +416,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
               )}
 
-              {/* SUB TAB 1 & 2: LOGIN OR SIGNUP */}
-              {activeTab !== 'supabase' && (
-                <form onSubmit={activeTab === 'login' ? handleLogin : handleSignUp} className="space-y-3.5">
-                  
-                  {activeTab === 'signup' && (
-                    <div>
-                      <label className="font-semibold text-stone-700 block mb-1">Tên tiệm / Họ tên</label>
-                      <div className="relative">
-                        <UserIcon className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="text"
-                          required
-                          placeholder="Tiệm In Caos Studio"
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:bg-white text-xs text-stone-900"
-                        />
-                      </div>
-                    </div>
-                  )}
-
+              {/* LOGIN FORM */}
+              {activeTab === 'login' && (
+                <form onSubmit={handleLogin} className="space-y-3.5">
                   <div>
                     <label className="font-semibold text-stone-700 block mb-1">Email</label>
                     <div className="relative">

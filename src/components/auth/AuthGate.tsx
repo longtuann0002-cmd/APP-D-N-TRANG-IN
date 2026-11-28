@@ -35,12 +35,11 @@ export const AuthGate: React.FC<AuthGateProps> = ({
   onLoginSuccess,
   shopInfo
 }) => {
-  const [activeTab, setActiveTab] = useState<'login' | 'signup' | 'cloud'>('login');
+  const [activeTab, setActiveTab] = useState<'login' | 'cloud'>('login');
   
   // Auth fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [authMsg, setAuthMsg] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,10 +65,16 @@ export const AuthGate: React.FC<AuthGateProps> = ({
       const res = await loginWithSupabase(email, password);
       setIsLoading(false);
       if (res.error) {
-        if (res.error.toLowerCase().includes('invalid login credentials')) {
+        const errLower = res.error.toLowerCase();
+        if (errLower.includes('email not confirmed')) {
           setAuthMsg({ 
             type: 'error', 
-            text: 'Email hoặc mật khẩu chưa chính xác. Nếu chưa có tài khoản, bạn hãy bấm tab "Đăng ký tiệm" bên cạnh để tạo tài khoản mới ngay!' 
+            text: 'Tài khoản chưa được kích hoạt! Vui lòng báo Chủ Tiệm vào Supabase bấm "Confirm User" để duyệt tài khoản.' 
+          });
+        } else if (errLower.includes('invalid login credentials')) {
+          setAuthMsg({ 
+            type: 'error', 
+            text: 'Email hoặc mật khẩu chưa chính xác. Hệ thống nội bộ tiệm chỉ dành cho tài khoản được Chủ Tiệm cấp quyền.' 
           });
         } else {
           setAuthMsg({ type: 'error', text: 'Đăng nhập thất bại: ' + res.error });
@@ -82,37 +87,8 @@ export const AuthGate: React.FC<AuthGateProps> = ({
       setIsLoading(false);
       setAuthMsg({ 
         type: 'error', 
-        text: 'Chưa kết nối Supabase Cloud. Vui lòng bấm tab Cloud để kiểm tra URL và Key.' 
+        text: 'Chưa kết nối Supabase Cloud. Vui lòng bấm "Cấu hình Cloud" ở góc trên để kiểm tra kết nối.' 
       });
-    }
-  };
-
-  // Handle Sign Up
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthMsg(null);
-
-    if (!connected) {
-      setAuthMsg({ 
-        type: 'info', 
-        text: 'Chưa kết nối Supabase Cloud. Vui lòng cấu hình tab Cloud để đăng ký tài khoản.' 
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    const res = await signUpWithSupabase(email, password, fullName);
-    setIsLoading(false);
-
-    if (res.error) {
-      setAuthMsg({ type: 'error', text: 'Đăng ký thất bại: ' + res.error });
-    } else if (res.user) {
-      setAuthMsg({ type: 'success', text: 'Tạo tài khoản và đăng nhập thành công!' });
-      setTimeout(() => onLoginSuccess(res.user!), 700);
-    } else if (res.message) {
-      setAuthMsg({ type: 'info', text: res.message });
-      // Switch back to login tab after 2.5s
-      setTimeout(() => setActiveTab('login'), 2500);
     }
   };
 
@@ -195,38 +171,25 @@ export const AuthGate: React.FC<AuthGateProps> = ({
           </div>
         </div>
 
-        {/* Tab Controls */}
-        <div className="px-6 pt-4 pb-2">
-          <div className="flex p-1 bg-stone-100 rounded-2xl text-xs font-bold">
-            <button
-              type="button"
-              onClick={() => { setActiveTab('login'); setAuthMsg(null); }}
-              className={`flex-1 py-2 rounded-xl transition ${
-                activeTab === 'login' ? 'bg-white text-stone-950 shadow-xs' : 'text-stone-500 hover:text-stone-900'
-              }`}
-            >
-              Đăng nhập
-            </button>
-            <button
-              type="button"
-              onClick={() => { setActiveTab('signup'); setAuthMsg(null); }}
-              className={`flex-1 py-2 rounded-xl transition ${
-                activeTab === 'signup' ? 'bg-white text-stone-950 shadow-xs' : 'text-stone-500 hover:text-stone-900'
-              }`}
-            >
-              Đăng ký tiệm
-            </button>
-            <button
-              type="button"
-              onClick={() => { setActiveTab('cloud'); setCloudMsg(null); }}
-              className={`px-3 py-2 rounded-xl transition flex items-center gap-1 shrink-0 ${
-                activeTab === 'cloud' ? 'bg-white text-stone-950 shadow-xs' : 'text-stone-500 hover:text-stone-900'
-              }`}
-            >
-              <Database className="w-3.5 h-3.5" />
-              <span>Cloud</span>
-            </button>
-          </div>
+        {/* Navigation / Header Indicator */}
+        <div className="px-6 pt-4 pb-1 flex items-center justify-between text-xs">
+          <span className="font-extrabold text-stone-900 text-sm flex items-center gap-1.5">
+            <Lock className="w-4 h-4 text-orange-500" />
+            <span>Đăng nhập hệ thống</span>
+          </span>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab(activeTab === 'cloud' ? 'login' : 'cloud');
+              setAuthMsg(null);
+            }}
+            className="text-[11px] font-semibold text-stone-500 hover:text-stone-800 flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-stone-100 transition"
+            title="Cấu hình kết nối Supabase Cloud"
+          >
+            <Database className="w-3.5 h-3.5 text-stone-400" />
+            <span>{activeTab === 'cloud' ? 'Về Đăng nhập' : 'Cấu hình Cloud'}</span>
+          </button>
         </div>
 
         {/* Forms Body */}
@@ -246,24 +209,9 @@ export const AuthGate: React.FC<AuthGateProps> = ({
             </div>
           )}
 
-          {/* TAB 1 & 2: LOGIN / SIGNUP */}
-          {activeTab !== 'cloud' ? (
-            <form onSubmit={activeTab === 'login' ? handleLogin : handleSignUp} className="space-y-3">
-              
-              {activeTab === 'signup' && (
-                <div>
-                  <label className="font-bold text-stone-700 block mb-1">Tên tiệm / Họ tên</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Tiệm In Caos Studio"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:bg-white text-stone-900"
-                  />
-                </div>
-              )}
-
+          {/* MAIN LOGIN FORM */}
+          {activeTab === 'login' ? (
+            <form onSubmit={handleLogin} className="space-y-3">
               <div>
                 <label className="font-bold text-stone-700 block mb-1">Email tài khoản</label>
                 <div className="relative">
@@ -271,7 +219,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({
                   <input
                     type="email"
                     required
-                    placeholder="tiemanh@caosprint.vn"
+                    placeholder="longtuan180420@gmail.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-9 pr-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:bg-white text-stone-900"
@@ -308,16 +256,11 @@ export const AuthGate: React.FC<AuthGateProps> = ({
                 className="w-full py-3 bg-gradient-to-tr from-orange-500 to-orange-400 hover:from-orange-400 hover:to-orange-300 text-white font-black text-sm rounded-xl shadow-lg shadow-orange-500/30 active:scale-98 transition flex items-center justify-center gap-2 mt-4"
               >
                 {isLoading ? (
-                  <span>Đang xử lý...</span>
-                ) : activeTab === 'login' ? (
+                  <span>Đang kiểm tra...</span>
+                ) : (
                   <>
                     <LogIn className="w-4 h-4" />
                     <span>Mở khóa vào Tiệm</span>
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="w-4 h-4" />
-                    <span>Đăng ký tài khoản</span>
                   </>
                 )}
               </button>
@@ -347,13 +290,16 @@ export const AuthGate: React.FC<AuthGateProps> = ({
                 <span>Tiếp tục với tài khoản Google</span>
               </button>
 
-              <p className="text-[10px] text-stone-400 text-center leading-relaxed mt-3">
-                Dữ liệu đơn hàng, doanh số và danh bạ khách hàng được bảo vệ an toàn 100%.
-              </p>
+              <div className="pt-2 text-center border-t border-stone-100 mt-4">
+                <p className="text-[10px] text-stone-400 leading-relaxed flex items-center justify-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-stone-400" />
+                  <span>Hệ thống nội bộ • Tài khoản do Chủ Tiệm trực tiếp phê duyệt và cấp quyền</span>
+                </p>
+              </div>
             </form>
           ) : (
 
-            /* TAB 3: CLOUD CONFIGURATION */
+            /* TAB 2: CLOUD CONFIGURATION */
             <form onSubmit={handleSaveCloud} className="space-y-3.5">
               <div className="p-3 bg-stone-50 border border-stone-200 rounded-2xl text-stone-700 leading-relaxed text-[11px]">
                 <span className="font-bold block text-stone-900 mb-0.5">Kết nối máy chủ Supabase Miễn phí</span>
