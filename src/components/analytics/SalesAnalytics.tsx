@@ -1,15 +1,12 @@
-﻿import React, { useState } from 'react';
-import { Project, Customer } from '../../types';
+﻿import React, { useMemo, useState } from 'react';
+import { Project, Customer, OrderStatus } from '../../types';
+import { calculateOrderPrice } from '../../core/pricing/pricingEngine';
+import { storageManager } from '../../core/storage/storageManager';
 import { 
   BarChart3, 
   TrendingUp, 
-  DollarSign, 
   Calendar, 
-  Sparkles, 
-  CheckCircle2,
-  Users,
-  Layers,
-  ArrowUpRight
+  Sparkles
 } from 'lucide-react';
 
 interface SalesAnalyticsProps {
@@ -17,29 +14,121 @@ interface SalesAnalyticsProps {
   customers: Customer[];
 }
 
+function getProjectAmount(p: Project): number {
+  const paperFinish = p.paperFinish || p.layoutConfig.paperFinish || 'glossy';
+  const lamination = p.lamination || p.layoutConfig.lamination || 'none';
+
+  if (p.layoutConfig.mode === 'multi' && p.layoutConfig.multiSizes && p.layoutConfig.multiSizes.length > 0) {
+    return p.layoutConfig.multiSizes.reduce((sum, m) => {
+      const res = calculateOrderPrice({
+        widthMm: m.widthMm,
+        heightMm: m.heightMm,
+        quantity: m.count || 1,
+        paperFinish,
+        lamination,
+        nameOrId: m.sizeId || m.name
+      });
+      return sum + res.totalPrice;
+    }, 0);
+  }
+
+  const totalSlots = p.pages.reduce((acc, pg) => acc + pg.placedPhotos.length, 0);
+  const slotsCount = totalSlots > 0 ? totalSlots : (p.totalPhotosCount || p.photos.length);
+  if (slotsCount === 0) return 0;
+
+  const allTemplates = storageManager.getTemplates();
+  const matchingTpl = allTemplates.find(t =>
+    t.id === p.layoutConfig.photoPresetId?.replace('tpl-', '') ||
+    t.name === p.layoutConfig.photoPresetId
+  );
+
+  return calculateOrderPrice({
+    widthMm: p.layoutConfig.customWidthMm,
+    heightMm: p.layoutConfig.customHeightMm,
+    quantity: slotsCount,
+    paperFinish,
+    lamination,
+    nameOrId: p.layoutConfig.photoPresetId,
+    subSlotLayout: p.layoutConfig.subSlotLayout,
+    customOverridePrice: p.layoutConfig.customPrice || matchingTpl?.customPrice,
+    priceTiers: matchingTpl?.priceTiers
+  }).totalPrice;
+}
+
+const STATUS_LABELS: Record<OrderStatus, { label: string; className: string }> = {
+  new: { label: 'Mới', className: 'text-sky-700 bg-sky-50' },
+  processing: { label: 'Đang xử lý', className: 'text-orange-700 bg-orange-50' },
+  in_progress: { label: 'Đang làm', className: 'text-orange-700 bg-orange-50' },
+  printed: { label: 'Đã in', className: 'text-emerald-700 bg-emerald-50' },
+  delivered: { label: 'Đã giao', className: 'text-emerald-700 bg-emerald-50' }
+};
+
 export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
   projects,
   customers
 }) => {
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'all'>('month');
 
-  const totalRevenue = customers.reduce((sum, c) => sum + c.totalAmount, 0) || 1280000;
-  const totalPaid = customers.reduce((sum, c) => sum + c.paidAmount, 0) || 1150000;
-  const totalDebt = customers.reduce((sum, c) => sum + c.debtAmount, 0) || 130000;
-  const totalOrders = projects.length || 18;
-  const totalPhotos = projects.reduce((sum, p) => sum + p.photos.length, 0) || 342;
+  const filteredProjects = useMemo(() => {
+    if (timeRange === 'all') return projects;
+    const now = new Date();
+    return projects.filter(p => {
+      const created = new Date(p.createdAt);
+      if (Number.isNaN(created.getTime())) return false;
+      if (timeRange === 'week') {
+        const sevenDaysAgo = new Date(now);
+        sevenDaysAgo.setDate(now.getDate() - 7);
+        return created >= sevenDaysAgo;
+      }
+      // month
+      return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
+    });
+  }, [projects, timeRange]);
 
-  // Mock 7-day revenue trend for visual bar chart
-  const weeklyData = [
-    { day: 'T2', amount: 140000, orders: 3 },
-    { day: 'T3', amount: 220000, orders: 5 },
-    { day: 'T4', amount: 180000, orders: 4 },
-    { day: 'T5', amount: 310000, orders: 7 },
-    { day: 'T6', amount: 260000, orders: 6 },
-    { day: 'T7', amount: 450000, orders: 11 },
-    { day: 'CN', amount: 390000, orders: 9 },
-  ];
-  const maxAmount = Math.max(...weeklyData.map(d => d.amount));
+  const totalRevenue = filteredProjects.reduce((sum, p) => sum + getProjectAmount(p), 0);
+  const totalPaid = timeRange === 'all'
+    ? customers.reduce((sum, c) => sum + (c.paidAmount || 0), 0)
+    : Math.min(totalRevenue, customers.reduce((sum, c) => sum + (c.paidAmount || 0), 0));
+  const totalDebt = timeRange === 'all'
+    ? customers.reduce((sum, c) => sum + (c.debtAmount || 0), 0)
+    : Math.max(0, totalRevenue - totalPaid);
+  const totalOrders = filteredProjects.length;
+  const totalPhotos = filteredProjects.reduce((sum, p) => sum + (p.totalPhotosCount || p.photos.length || 0), 0);
+
+  // Real 7-day revenue trend for current week (Mon..Sun)
+  const weeklyData = useMemo(() => {
+    const days = [
+      { day: 'T2', amount: 0, orders: 0 },
+      { day: 'T3', amount: 0, orders: 0 },
+      { day: 'T4', amount: 0, orders: 0 },
+      { day: 'T5', amount: 0, orders: 0 },
+      { day: 'T6', amount: 0, orders: 0 },
+      { day: 'T7', amount: 0, orders: 0 },
+      { day: 'CN', amount: 0, orders: 0 },
+    ];
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    const currentDay = now.getDay(); // 0 (Sun) .. 6 (Sat)
+    const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+    startOfWeek.setDate(now.getDate() + diffToMonday);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 7);
+
+    for (const p of projects) {
+      const created = new Date(p.createdAt);
+      if (Number.isNaN(created.getTime())) continue;
+      if (created >= startOfWeek && created < endOfWeek) {
+        const idx = created.getDay() === 0 ? 6 : created.getDay() - 1;
+        days[idx].amount += getProjectAmount(p);
+        days[idx].orders += 1;
+      }
+    }
+    return days;
+  }, [projects]);
+
+  const maxAmount = Math.max(...weeklyData.map(d => d.amount), 0);
 
   return (
     <div 
@@ -100,8 +189,8 @@ export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
             <span className="text-lg md:text-2xl font-black text-stone-900 block tracking-tight">
               {totalRevenue.toLocaleString('vi-VN')}đ
             </span>
-            <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5 mt-1">
-              <TrendingUp className="w-3 h-3" /> +14% so với trước
+            <span className="text-[10px] font-semibold text-stone-400 flex items-center gap-0.5 mt-1">
+              <TrendingUp className="w-3 h-3 text-emerald-600" /> {totalOrders} đơn trong kỳ
             </span>
           </div>
 
@@ -118,7 +207,9 @@ export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
             <span className="text-lg md:text-2xl font-black text-red-600 block tracking-tight">
               {totalDebt.toLocaleString('vi-VN')}đ
             </span>
-            <span className="text-[10px] text-amber-600 font-semibold block mt-1">Cần đối soát</span>
+            <span className={`text-[10px] font-semibold block mt-1 ${totalDebt > 0 ? 'text-orange-600' : 'text-stone-400'}`}>
+              {totalDebt > 0 ? 'Cần đối soát' : 'Không có công nợ'}
+            </span>
           </div>
 
           <div className="bg-white p-4 md:p-5 rounded-2xl border border-stone-200/80 shadow-2xs">
@@ -135,7 +226,7 @@ export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-amber-600" />
+                <BarChart3 className="w-4 h-4 text-orange-500" />
                 <span>Biểu đồ doanh thu gần đây</span>
               </h3>
               <p className="text-[11px] text-stone-400 mt-0.5">Khối lượng sản xuất và giá trị đơn hàng theo ngày</p>
@@ -149,22 +240,24 @@ export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
           <div className="pt-4 pb-2">
             <div className="h-40 flex items-end justify-between gap-2 md:gap-4 px-2">
               {weeklyData.map((d, idx) => {
-                const heightPercent = Math.round((d.amount / maxAmount) * 100);
-                const isMax = d.amount === maxAmount;
+                const heightPercent = maxAmount > 0 ? Math.max(4, Math.round((d.amount / maxAmount) * 100)) : 4;
+                const isMax = maxAmount > 0 && d.amount === maxAmount;
                 return (
                   <div key={idx} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
                     <span className="text-[9px] md:text-[10px] font-bold text-stone-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {(d.amount / 1000).toFixed(0)}k
+                      {d.amount > 0 ? `${(d.amount / 1000).toFixed(0)}k` : '0đ'}
                     </span>
                     <div 
                       className={`w-full max-w-[36px] rounded-t-lg transition-all duration-300 group-hover:brightness-110 shadow-2xs ${
                         isMax 
-                          ? 'bg-gradient-to-t from-stone-900 to-amber-500' 
-                          : 'bg-stone-200 hover:bg-stone-300'
+                          ? 'bg-gradient-to-t from-stone-900 to-orange-500' 
+                          : d.amount > 0
+                          ? 'bg-stone-300 hover:bg-stone-400'
+                          : 'bg-stone-100'
                       }`}
                       style={{ height: `${heightPercent}%` }}
                     />
-                    <span className={`text-[11px] font-bold ${isMax ? 'text-amber-700' : 'text-stone-400'}`}>
+                    <span className={`text-[11px] font-bold ${isMax ? 'text-orange-600' : 'text-stone-400'}`}>
                       {d.day}
                     </span>
                   </div>
@@ -188,24 +281,27 @@ export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
             {projects.length === 0 ? (
               <p className="text-stone-400 py-4 text-center">Chưa có đơn hàng nào được ghi nhận doanh số.</p>
             ) : (
-              projects.slice(0, 5).map(p => (
-                <div key={p.id} className="py-3 flex items-center justify-between hover:bg-stone-50/60 px-2 rounded-xl transition">
-                  <div className="pr-2">
-                    <span className="font-bold text-stone-900 block truncate max-w-xs">{p.name}</span>
-                    <span className="text-[11px] text-stone-400">
-                      {new Date(p.createdAt).toLocaleDateString('vi-VN')} • {p.photos.length} ảnh • {p.paperConfig.sizeId}
-                    </span>
+              projects.slice(0, 5).map(p => {
+                const statusInfo = STATUS_LABELS[p.status] || { label: 'Mới', className: 'text-stone-600 bg-stone-100' };
+                return (
+                  <div key={p.id} className="py-3 flex items-center justify-between hover:bg-stone-50/60 px-2 rounded-xl transition">
+                    <div className="pr-2">
+                      <span className="font-bold text-stone-900 block truncate max-w-xs">{p.name}</span>
+                      <span className="text-[11px] text-stone-400">
+                        {new Date(p.createdAt).toLocaleDateString('vi-VN')} • {p.totalPhotosCount || p.photos.length} ảnh • {p.paperConfig.sizeId}
+                      </span>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="font-bold text-stone-900 block">
+                        {getProjectAmount(p).toLocaleString('vi-VN')}đ
+                      </span>
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full inline-block mt-0.5 ${statusInfo.className}`}>
+                        {statusInfo.label}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <span className="font-bold text-stone-900 block">
-                      {(p.photos.length * 3500 || 24000).toLocaleString('vi-VN')}đ
-                    </span>
-                    <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-0.5">
-                      Đã hoàn thành
-                    </span>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
