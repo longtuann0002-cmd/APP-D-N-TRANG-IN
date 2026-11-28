@@ -311,6 +311,7 @@ export function App() {
 
   // Sync data with Supabase Cloud (pull if cloud has data, otherwise push local data up)
   const lastSyncRef = useRef<number>(0);
+  const [syncVersion, setSyncVersion] = useState(0);
 
   const refreshStateFromStorage = useCallback(() => {
     const latestProjects = storageManager.getProjects();
@@ -323,6 +324,7 @@ export function App() {
       const updated = latestProjects.find(p => p.id === prev.id);
       return updated || latestProjects[0] || null;
     });
+    setSyncVersion(v => v + 1);
   }, []);
 
   const syncCloudData = useCallback(async (force = false) => {
@@ -335,6 +337,7 @@ export function App() {
     if (result.ok) {
       if (result.hasCloudData) {
         refreshStateFromStorage();
+        await storageManager.pushMissingKeysToCloud(result.foundKeys);
       } else {
         await storageManager.pushAllToCloud();
       }
@@ -1354,6 +1357,7 @@ export function App() {
         {activeTab === 'templates' && (
           <div className="flex-1 overflow-y-auto pb-[80px] md:pb-0">
             <TemplateGallery
+              key={`templates-${syncVersion}`}
               onCreateProjectFromTemplate={handleCreateProject}
               onModalStateChange={setIsTemplateModalOpen}
             />
@@ -1574,6 +1578,7 @@ export function App() {
         onConfigChanged={() => {
           setSupabaseConnected(isSupabaseConfigured());
         }}
+        onDataSynced={refreshStateFromStorage}
       />
 
       {/* Export Modal */}

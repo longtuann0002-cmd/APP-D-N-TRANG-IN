@@ -18,8 +18,12 @@ import {
   ChevronRight,
   Settings2,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  RefreshCw,
+  UploadCloud,
+  DownloadCloud
 } from 'lucide-react';
+import { storageManager } from '../../core/storage/storageManager';
 import { 
   initSupabase, 
   isSupabaseConfigured, 
@@ -38,6 +42,7 @@ interface AuthModalProps {
   currentUser: UserProfile | null;
   onUserChanged: (user: UserProfile | null) => void;
   onConfigChanged: () => void;
+  onDataSynced?: () => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -45,7 +50,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   currentUser,
   onUserChanged,
-  onConfigChanged
+  onConfigChanged,
+  onDataSynced
 }) => {
   const [activeTab, setActiveTab] = useState<'login' | 'signup' | 'supabase'>('login');
   
@@ -275,6 +281,63 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 }`}>
                   {authMsg.type === 'success' ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
                   <span>{authMsg.text}</span>
+                </div>
+              )}
+
+              {/* Manual Cloud Sync Controls */}
+              {connected && (
+                <div className="p-3.5 rounded-2xl border border-stone-200 bg-stone-50/70 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-stone-800 text-xs flex items-center gap-1.5">
+                      <RefreshCw className="w-3.5 h-3.5 text-orange-500" />
+                      Đồng bộ dữ liệu đa thiết bị
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      disabled={isLoading}
+                      onClick={async () => {
+                        setIsLoading(true);
+                        setAuthMsg(null);
+                        const res = await storageManager.syncFromCloud();
+                        setIsLoading(false);
+                        if (res.ok) {
+                          if (res.hasCloudData) {
+                            onDataSynced?.();
+                            setAuthMsg({ type: 'success', text: `Đã tải từ Cloud (${res.projects} đơn hàng, ${res.customers} khách).` });
+                          } else {
+                            setAuthMsg({ type: 'info', text: 'Cloud chưa có dữ liệu. Hãy bấm "Đẩy lên Cloud" ở máy chính trước.' });
+                          }
+                        } else {
+                          setAuthMsg({ type: 'error', text: res.error || 'Lỗi tải dữ liệu từ Cloud.' });
+                        }
+                      }}
+                      className="px-3 py-2 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 font-semibold text-[11px] flex items-center justify-center gap-1.5 transition active:scale-95 disabled:opacity-50"
+                    >
+                      <DownloadCloud className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Tải từ Cloud</span>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isLoading}
+                      onClick={async () => {
+                        setIsLoading(true);
+                        setAuthMsg(null);
+                        const ok = await storageManager.pushAllToCloud();
+                        setIsLoading(false);
+                        if (ok) {
+                          setAuthMsg({ type: 'success', text: 'Đã đẩy toàn bộ đơn hàng, mẫu & bảng giá lên Cloud!' });
+                        } else {
+                          setAuthMsg({ type: 'error', text: 'Không đẩy được lên Cloud. Hãy kiểm tra đăng nhập.' });
+                        }
+                      }}
+                      className="px-3 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-semibold text-[11px] flex items-center justify-center gap-1.5 transition active:scale-95 disabled:opacity-50"
+                    >
+                      <UploadCloud className="w-3.5 h-3.5 text-orange-400" />
+                      <span>Đẩy lên Cloud</span>
+                    </button>
+                  </div>
                 </div>
               )}
 

@@ -346,23 +346,25 @@ export const storageManager = {
   },
 
   /** Pull all data from Supabase and overwrite localStorage */
-  async syncFromCloud(): Promise<{ ok: boolean; hasCloudData: boolean; projects: number; customers: number; error?: string }> {
+  async syncFromCloud(): Promise<{ ok: boolean; hasCloudData: boolean; foundKeys: string[]; projects: number; customers: number; error?: string }> {
     if (!isSupabaseConfigured() || !supabase) {
-      return { ok: false, hasCloudData: false, projects: 0, customers: 0, error: 'Supabase chưa kết nối' };
+      return { ok: false, hasCloudData: false, foundKeys: [], projects: 0, customers: 0, error: 'Supabase chưa kết nối' };
     }
     try {
       const { data, error } = await supabase
         .from('app_state')
         .select('data_key, data_value');
 
-      if (error) return { ok: false, hasCloudData: false, projects: 0, customers: 0, error: error.message };
+      if (error) return { ok: false, hasCloudData: false, foundKeys: [], projects: 0, customers: 0, error: error.message };
 
       let projectsCount = 0;
       let customersCount = 0;
+      const foundKeys: string[] = [];
       const hasCloudData = Array.isArray(data) && data.length > 0;
 
       if (data) {
         for (const row of data) {
+          foundKeys.push(row.data_key);
           switch (row.data_key) {
             case 'projects':
               if (Array.isArray(row.data_value)) {
@@ -410,9 +412,55 @@ export const storageManager = {
         }
       }
 
-      return { ok: true, hasCloudData, projects: projectsCount, customers: customersCount };
+      return { ok: true, hasCloudData, foundKeys, projects: projectsCount, customers: customersCount };
     } catch (err: any) {
-      return { ok: false, hasCloudData: false, projects: 0, customers: 0, error: err?.message || 'Lỗi không xác định' };
+      return { ok: false, hasCloudData: false, foundKeys: [], projects: 0, customers: 0, error: err?.message || 'Lỗi không xác định' };
+    }
+  },
+
+  /** Push any local keys that don't exist on Cloud yet (avoids overwriting with untouched defaults) */
+  async pushMissingKeysToCloud(foundKeys: string[]): Promise<void> {
+    if (!isSupabaseConfigured() || !supabase) return;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
+      if (!user) return;
+
+      const existing = new Set(foundKeys);
+      const now = new Date().toISOString();
+      const rows: Array<{ user_id: string; data_key: string; data_value: unknown; updated_at: string }> = [];
+
+      if (!existing.has('projects') && this.getProjects().length > 0) {
+        rows.push({ user_id: user.id, data_key: 'projects', data_value: this.getProjects(), updated_at: now });
+      }
+      if (!existing.has('customers') && this.getCustomers().length > 0) {
+        rows.push({ user_id: user.id, data_key: 'customers', data_value: this.getCustomers(), updated_at: now });
+      }
+      if (!existing.has('templates') && this.getCustomTemplatesList().length > 0) {
+        rows.push({ user_id: user.id, data_key: 'templates', data_value: this.getCustomTemplatesList(), updated_at: now });
+      }
+      if (!existing.has('deleted_templates') && this.getDeletedTemplateIds().size > 0) {
+        rows.push({ user_id: user.id, data_key: 'deleted_templates', data_value: [...this.getDeletedTemplateIds()], updated_at: now });
+      }
+      if (!existing.has('prices') && localStorage.getItem(PRICES_KEY)) {
+        rows.push({ user_id: user.id, data_key: 'prices', data_value: this.getPriceSettings(), updated_at: now });
+      }
+      if (!existing.has('tiered_prices') && localStorage.getItem(TIERED_PRICES_KEY)) {
+        rows.push({ user_id: user.id, data_key: 'tiered_prices', data_value: this.getTieredPricingRules(), updated_at: now });
+      }
+      if (!existing.has('lamination_prices') && localStorage.getItem(LAMINATION_PRICES_KEY)) {
+        rows.push({ user_id: user.id, data_key: 'lamination_prices', data_value: this.getLaminationPricingSettings(), updated_at: now });
+      }
+      if (!existing.has('shop_info') && localStorage.getItem('caos_studio_shop_info')) {
+        rows.push({ user_id: user.id, data_key: 'shop_info', data_value: this.getShopInfo(), updated_at: now });
+      }
+
+      if (rows.length > 0) {
+        const { error } = await supabase.from('app_state').upsert(rows, { onConflict: 'user_id,data_key' });
+        if (error) console.warn('pushMissingKeysToCloud error:', error.message);
+      }
+    } catch (err) {
+      console.warn('pushMissingKeysToCloud exception:', err);
     }
   },
 
