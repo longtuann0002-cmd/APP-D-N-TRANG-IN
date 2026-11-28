@@ -169,6 +169,31 @@ export async function loginWithSupabase(
 }
 
 /**
+ * Login with Google OAuth via Supabase
+ */
+export async function loginWithGoogle(): Promise<{ error?: string }> {
+  if (!supabase) {
+    return { error: 'Chưa cấu hình kết nối Supabase Cloud. Vui lòng kiểm tra tab Cloud.' };
+  }
+
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+
+    if (error) {
+      return { error: error.message };
+    }
+    return {};
+  } catch (err: any) {
+    return { error: err.message || 'Lỗi kết nối Google OAuth.' };
+  }
+}
+
+/**
  * Sign up with Supabase Cloud
  */
 export async function signUpWithSupabase(

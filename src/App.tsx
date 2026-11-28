@@ -13,7 +13,7 @@ import {
 } from './types';
 import { storageManager } from './core/storage/storageManager';
 import { computeLayout } from './core/layout/layoutEngine';
-import { isSupabaseConfigured, getCurrentUser, UserProfile } from './core/storage/supabaseClient';
+import { isSupabaseConfigured, getCurrentUser, UserProfile, supabase, saveUserSession } from './core/storage/supabaseClient';
 import { getDemoPhotos } from './core/image/samplePhotos';
 import { restoreProjectPhotos } from './core/image/imageProcessor';
 import { deletePhotoBlob, clearProjectBlobs } from './core/storage/indexedDbStorage';
@@ -261,7 +261,53 @@ export function App() {
 
   // Check Supabase connection state & User Auth Session
   const [supabaseConnected, setSupabaseConnected] = useState(() => isSupabaseConfigured());
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => getCurrentUser());
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+    const user = getCurrentUser();
+    if (user && user.id && user.id.startsWith('demo-')) {
+      localStorage.removeItem('caos_studio_current_user');
+      return null;
+    }
+    return user;
+  });
+
+  // Listen to Supabase Auth state changes (including Google OAuth redirect)
+  useEffect(() => {
+    if (supabase) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          const profile: UserProfile = {
+            id: session.user.id,
+            email: session.user.email || '',
+            fullName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Chủ Tiệm Caos',
+            role: 'owner',
+            isCloud: true,
+            avatarUrl: session.user.user_metadata?.avatar_url,
+            lastLogin: new Date().toISOString()
+          };
+          saveUserSession(profile);
+          setCurrentUser(profile);
+        }
+      });
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+          const profile: UserProfile = {
+            id: session.user.id,
+            email: session.user.email || '',
+            fullName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Chủ Tiệm Caos',
+            role: 'owner',
+            isCloud: true,
+            avatarUrl: session.user.user_metadata?.avatar_url,
+            lastLogin: new Date().toISOString()
+          };
+          saveUserSession(profile);
+          setCurrentUser(profile);
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    }
+  }, [supabaseConnected]);
 
   // Map of loaded photos for fast canvas lookup
   const photosMap = useMemo(() => {

@@ -25,10 +25,11 @@ import {
   isSupabaseConfigured, 
   UserProfile, 
   getCurrentUser, 
-  loginDemoUser, 
+  loginWithGoogle, 
   loginWithSupabase, 
   signUpWithSupabase, 
-  logoutUser 
+  logoutUser,
+  sanitizeSupabaseUrl
 } from '../../core/storage/supabaseClient';
 
 interface AuthModalProps {
@@ -124,15 +125,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         setTimeout(() => onClose(), 800);
       }
     } else {
-      // Offline / Local Demo mode
       setIsLoading(false);
-      const user = loginDemoUser(email || 'chutiem@caosprint.vn', email ? email.split('@')[0] : 'Chủ Tiệm Caos');
-      onUserChanged(user);
       setAuthMsg({ 
-        type: 'success', 
-        text: 'Đã đăng nhập thành công chế độ Tiệm (Bộ nhớ máy). Kết nối Supabase khi cần đồng bộ đa thiết bị!' 
+        type: 'error', 
+        text: 'Chưa kết nối Supabase Cloud. Vui lòng kiểm tra tab Cloud để kết nối.' 
       });
-      setTimeout(() => onClose(), 900);
     }
   };
 
@@ -164,15 +161,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  // Quick 1-click Demo Login
-  const handleQuickDemoLogin = () => {
-    const user = loginDemoUser('chutiem@caosprint.vn', 'Chủ Tiệm Caos');
-    onUserChanged(user);
-    setAuthMsg({ 
-      type: 'success', 
-      text: 'Đã kích hoạt phiên làm việc thử nghiệm của Chủ Tiệm Caos!' 
-    });
-    setTimeout(() => onClose(), 700);
+  // Google OAuth Login
+  const handleGoogleLogin = async () => {
+    setAuthMsg(null);
+    setIsLoading(true);
+    const res = await loginWithGoogle();
+    setIsLoading(false);
+    if (res.error) {
+      setAuthMsg({ type: 'error', text: res.error });
+    }
   };
 
   // Logout handler
@@ -484,27 +481,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     <span>{activeTab === 'login' ? 'Đăng nhập vào tiệm' : 'Tạo tài khoản mới'}</span>
                   </button>
 
-                  {/* OR Quick Demo One-Click Test */}
+                  {/* Google Sign In Option */}
                   <div className="relative my-4 text-center">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-stone-200"></div>
                     </div>
-                    <span className="relative px-3 bg-white text-[11px] font-semibold text-stone-400 uppercase tracking-wider">
-                      Hoặc trải nghiệm ngay
+                    <span className="relative px-3 bg-white text-[10px] font-extrabold text-stone-400 uppercase tracking-widest">
+                      Hoặc đăng nhập với
                     </span>
                   </div>
 
                   <button
                     type="button"
-                    onClick={handleQuickDemoLogin}
-                    className="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs rounded-xl shadow-xs active:scale-98 transition flex items-center justify-center gap-2 group"
+                    onClick={handleGoogleLogin}
+                    disabled={isLoading}
+                    className="w-full py-2.5 bg-white hover:bg-stone-50 border border-stone-300 hover:border-stone-400 text-stone-800 font-bold text-xs rounded-xl shadow-2xs active:scale-98 transition flex items-center justify-center gap-2.5"
                   >
-                    <Sparkles className="w-4 h-4 text-orange-400 group-hover:rotate-12 transition-transform" />
-                    <span>Thử nghiệm nhanh 1 chạm (Tài khoản mẫu)</span>
+                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                    </svg>
+                    <span>Tiếp tục với tài khoản Google</span>
                   </button>
 
-                  <p className="text-[11px] text-stone-400 text-center leading-relaxed">
-                    Chế độ thử nghiệm giúp bạn trải nghiệm ngay mọi tính năng mà chưa cần tạo tài khoản Supabase.
+                  <p className="text-[10px] text-stone-400 text-center leading-relaxed mt-2">
+                    Dữ liệu đơn hàng, doanh số và danh bạ khách hàng được bảo vệ an toàn 100%.
                   </p>
                 </form>
               )}
