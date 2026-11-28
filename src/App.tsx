@@ -809,27 +809,29 @@ export function App() {
     storageManager.saveProject(updatedProject);
   };
 
-  // Save crop settings from modal
-  const handleSavePhotoCrop = (photoId: string, cropSettings: PhotoCropSettings, applyToAll?: boolean) => {
-    if (!activeProject) return;
-    const updatedPhotos = activeProject.photos.map(p => {
-      if (p.id === photoId || applyToAll) {
-        return { 
-          ...p, 
-          cropSettings, 
-          cropMode: (cropSettings.mode === 'fit' ? 'fit' : 'fill') as 'fit' | 'fill'
-        };
+  // Save crop settings from modal or inline canvas drag/zoom
+  const handleSavePhotoCrop = (photoId: string, cropSettings: PhotoCropSettings, applyToAll?: boolean, commitToStorage = true) => {
+    setActiveProject(prev => {
+      if (!prev) return prev;
+      const updatedPhotos = prev.photos.map(p => {
+        if (p.id === photoId || applyToAll) {
+          return { 
+            ...p, 
+            cropSettings, 
+            cropMode: (cropSettings.mode === 'fit' ? 'fit' : 'fill') as 'fit' | 'fill'
+          };
+        }
+        return p;
+      });
+      const updatedProject = {
+        ...prev,
+        photos: updatedPhotos
+      };
+      if (commitToStorage) {
+        storageManager.saveProject(updatedProject);
       }
-      return p;
+      return updatedProject;
     });
-
-    const updatedProject = {
-      ...activeProject,
-      photos: updatedPhotos
-    };
-
-    setActiveProject(updatedProject);
-    storageManager.saveProject(updatedProject);
   };
 
   // Save color/filter adjustments from modal
@@ -1333,6 +1335,7 @@ export function App() {
                 onFlipPhotoInSlot={handleFlipPhotoInSlot}
                 onToggleCropPhotoInSlot={handleToggleCropPhotoInSlot}
                 onAdjustCropInSlot={handleAdjustCropInSlot}
+                onUpdatePhotoCrop={(photoId, cropSettings, commit) => handleSavePhotoCrop(photoId, cropSettings, false, commit)}
                 onAdjustFilterInSlot={handleAdjustFilterInSlot}
                 onRemovePhotoFromSlot={handleRemovePhotoFromSlot}
                 scale={canvasScale}

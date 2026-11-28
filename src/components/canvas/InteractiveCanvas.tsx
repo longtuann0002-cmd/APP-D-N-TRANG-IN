@@ -7,9 +7,13 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
-  Plus
+  Plus,
+  ZoomIn,
+  ZoomOut,
+  Check,
+  Move
 } from 'lucide-react';
-import { SheetLayout, PaperConfig, LayoutConfig, PhotoItem, PlacedPhoto } from '../../types';
+import { SheetLayout, PaperConfig, LayoutConfig, PhotoItem, PlacedPhoto, PhotoCropSettings } from '../../types';
 import { renderSheetToCanvas, getSlotSubCells } from '../../core/canvas/canvasRenderer';
 
 export interface InteractiveCanvasHandle {
@@ -31,6 +35,7 @@ interface InteractiveCanvasProps {
   onFlipPhotoInSlot?: (slotId: string) => void;
   onToggleCropPhotoInSlot?: (slotId: string) => void;
   onAdjustCropInSlot?: (slotId: string) => void;
+  onUpdatePhotoCrop?: (photoId: string, cropSettings: PhotoCropSettings, commitToStorage?: boolean) => void;
   onAdjustFilterInSlot?: (slotId: string) => void;
   onRemovePhotoFromSlot?: (slotId: string) => void;
   scale?: number;
@@ -50,11 +55,13 @@ interface PageCanvasProps {
   layoutConfig: LayoutConfig;
   photosMap: Map<string, PhotoItem>;
   selectedSlotId: string | null;
+  inlineCropSlotId: string | null;
   hoveredSlotId: string | null;
   dragOverSlotId: string | null;
   onSelectPage: (idx: number) => void;
   onSelectSlot: (slotId: string | null) => void;
   onDoubleClickSlot?: (slotId: string) => void;
+  onUpdatePhotoCrop?: (photoId: string, cropSettings: PhotoCropSettings, commitToStorage?: boolean) => void;
   onHoverSlot: (slotId: string | null) => void;
   onDragOverSlot: (slotId: string | null) => void;
   onDropPhoto: (slotId: string, photoId: string) => void;
@@ -70,11 +77,13 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
   layoutConfig,
   photosMap,
   selectedSlotId,
+  inlineCropSlotId,
   hoveredSlotId,
   dragOverSlotId,
   onSelectPage,
   onSelectSlot,
   onDoubleClickSlot,
+  onUpdatePhotoCrop,
   onHoverSlot,
   onDragOverSlot,
   onDropPhoto,
@@ -150,7 +159,129 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
     return null;
   };
 
+  const getSlotDetailsById = (targetId: string): { photo: PhotoItem; widthPx: number; heightPx: number } | null => {
+    if (!page) return null;
+    const isSub = targetId.includes('__sub__');
+    const baseId = isSub ? targetId.split('__sub__')[0] : targetId;
+    const subIdx = isSub ? parseInt(targetId.split('__sub__')[1], 10) : null;
+    const slot = page.placedPhotos.find(s => s.slotId === baseId);
+    if (!slot) return null;
+
+    const pid = subIdx !== null && slot.subPhotos ? slot.subPhotos[subIdx] : (slot.photoId ?? slot.subPhotos?.[0]);
+    const photo = pid ? photosMap.get(pid) : undefined;
+    if (!photo) return null;
+
+    const subCells = getSlotSubCells(slot, layoutConfig);
+    const cell = subCells.length > 1 ? subCells.find(c => c.subKey === targetId) : null;
+    const widthMm = cell ? cell.width : slot.width;
+    const heightMm = cell ? cell.height : slot.height;
+    return { photo, widthPx: widthMm * scale, heightPx: heightMm * scale };
+  };
+
+  const inlineDragRef = useRef<{
+    startX: number;
+    startY: number;
+    startOffX: number;
+    startOffY: number;
+    widthPx: number;
+    heightPx: number;
+    photo: PhotoItem;
+    baseCrop: PhotoCropSettings;
+  } | null>(null);
+  const [isDraggingInline, setIsDraggingInline] = useState(false);
+
+  const beginInlineDrag = (clientX: number, clientY: number): boolean => {
+    if (!inlineCropSlotId || !onUpdatePhotoCrop) return false;
+    const hitId = getSlotAtPoint(clientX, clientY);
+    if (hitId !== inlineCropSlotId) return false;
+
+    const details = getSlotDetailsById(inlineCropSlotId);
+    if (!details) return false;
+
+    const current = details.photo.cropSettings || {
+      mode: (details.photo.cropMode || layoutConfig.cropMode || 'fill') as 'fill' | 'fit',
+      scale: 1,
+      offsetX: 0,
+      offsetY: 0
+    };
+
+    inlineDragRef.current = {
+      startX: clientX,
+      startY: clientY,
+      startOffX: current.offsetX || 0,
+      startOffY: current.offsetY || 0,
+      widthPx: Math.max(10, details.widthPx),
+      heightPx: Math.max(10, details.heightPx),
+      photo: details.photo,
+      baseCrop: current
+    };
+    setIsDraggingInline(true);
+    return true;
+  };
+
+  useEffect(() => {
+    if (!isDraggingInline) return;
+
+    const handleMove = (clientX: number, clientY: number) => {
+      const drag = inlineDragRef.current;
+      if (!drag || !onUpdatePhotoCrop) return;
+      const dx = clientX - drag.startX;
+      const dy = clientY - drag.startY;
+      const nextX = Math.max(-150, Math.min(150, drag.startOffX + (dx / drag.widthPx) * 100));
+      const nextY = Math.max(-150, Math.min(150, drag.startOffY + (dy / drag.heightPx) * 100));
+      onUpdatePhotoCrop(drag.photo.id, {
+        ...drag.baseCrop,
+        mode: 'custom',
+        offsetX: Math.round(nextX * 10) / 10,
+        offsetY: Math.round(nextY * 10) / 10
+      }, false);
+    };
+
+    const handleEnd = (clientX: number, clientY: number) => {
+      const drag = inlineDragRef.current;
+      if (drag && onUpdatePhotoCrop) {
+        const dx = clientX - drag.startX;
+        const dy = clientY - drag.startY;
+        const nextX = Math.max(-150, Math.min(150, drag.startOffX + (dx / drag.widthPx) * 100));
+        const nextY = Math.max(-150, Math.min(150, drag.startOffY + (dy / drag.heightPx) * 100));
+        onUpdatePhotoCrop(drag.photo.id, {
+          ...drag.baseCrop,
+          mode: 'custom',
+          offsetX: Math.round(nextX * 10) / 10,
+          offsetY: Math.round(nextY * 10) / 10
+        }, true);
+      }
+      inlineDragRef.current = null;
+      setIsDraggingInline(false);
+    };
+
+    const onMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
+    const onMouseUp = (e: MouseEvent) => handleEnd(e.clientX, e.clientY);
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        e.preventDefault();
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      const touch = e.changedTouches[0];
+      if (touch) handleEnd(touch.clientX, touch.clientY);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd);
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [isDraggingInline, onUpdatePhotoCrop]);
+
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (isDraggingInline) return;
     onSelectPage(pageIndex);
     const slotId = getSlotAtPoint(e.clientX, e.clientY);
     onSelectSlot(slotId);
@@ -163,6 +294,32 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
       onSelectSlot(slotId);
       onDoubleClickSlot?.(slotId);
     }
+  };
+
+  const handleWheelOnCanvas = (e: React.WheelEvent<HTMLCanvasElement>) => {
+    if (!inlineCropSlotId || !onUpdatePhotoCrop) return;
+    const hitId = getSlotAtPoint(e.clientX, e.clientY);
+    if (hitId !== inlineCropSlotId) return;
+
+    const details = getSlotDetailsById(inlineCropSlotId);
+    if (!details) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const current = details.photo.cropSettings || {
+      mode: (details.photo.cropMode || layoutConfig.cropMode || 'fill') as 'fill' | 'fit',
+      scale: 1,
+      offsetX: 0,
+      offsetY: 0
+    };
+    const delta = e.deltaY < 0 ? 0.08 : -0.08;
+    const nextScale = Math.max(0.3, Math.min(4.0, Math.round(((current.scale ?? 1) + delta) * 100) / 100));
+    onUpdatePhotoCrop(details.photo.id, {
+      ...current,
+      mode: 'custom',
+      scale: nextScale
+    }, true);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -220,7 +377,19 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
           ref={canvasRef}
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
+          onMouseDown={(e) => {
+            if (e.button === 0 && beginInlineDrag(e.clientX, e.clientY)) {
+              e.stopPropagation();
+            }
+          }}
+          onWheel={handleWheelOnCanvas}
+          onTouchStart={(e) => {
+            if (e.touches.length === 1 && beginInlineDrag(e.touches[0].clientX, e.touches[0].clientY)) {
+              e.stopPropagation();
+            }
+          }}
           onTouchEnd={(e) => {
+            if (isDraggingInline) return;
             if (e.changedTouches && e.changedTouches.length > 0) {
               const touch = e.changedTouches[0];
               onSelectPage(pageIndex);
@@ -233,7 +402,7 @@ const SingleSheetView: React.FC<PageCanvasProps> = ({
           onDragOver={handleDragOver}
           onDragLeave={() => onDragOverSlot(null)}
           onDrop={handleDrop}
-          className="cursor-pointer touch-manipulation"
+          className={`${inlineCropSlotId ? 'cursor-move' : 'cursor-pointer'} touch-manipulation`}
         />
       </div>
     </div>
@@ -254,6 +423,7 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
   onFlipPhotoInSlot,
   onToggleCropPhotoInSlot,
   onAdjustCropInSlot,
+  onUpdatePhotoCrop,
   onAdjustFilterInSlot,
   onRemovePhotoFromSlot,
   scale: externalScale,
@@ -278,6 +448,24 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
 
   const [hoveredSlotId, setHoveredSlotId] = useState<string | null>(null);
   const [dragOverSlotId, setDragOverSlotId] = useState<string | null>(null);
+  const [inlineCropSlotId, setInlineCropSlotId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (inlineCropSlotId && selectedSlotId !== inlineCropSlotId) {
+      setInlineCropSlotId(null);
+    }
+  }, [selectedSlotId, inlineCropSlotId]);
+
+  useEffect(() => {
+    if (!inlineCropSlotId) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.key === 'Enter') {
+        setInlineCropSlotId(null);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [inlineCropSlotId]);
   const [isPanning, setIsPanning] = useState(false);
   const panStartRef = useRef<{ startX: number; startY: number; scrollLeft: number; scrollTop: number } | null>(null);
   const [isSpacePressed, setIsSpacePressed] = useState(false);
@@ -517,7 +705,69 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
                 </button>
               )}
 
-              {onAdjustCropInSlot ? (
+              {inlineCropSlotId === selectedSlotId && onUpdatePhotoCrop ? (
+                <>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-500/20 text-orange-300 rounded-lg text-[11px] font-semibold shrink-0">
+                    <Move className="w-3 h-3" />
+                    <span>Kéo ảnh • Cuộn để zoom</span>
+                  </span>
+
+                  <div className="flex items-center gap-1 bg-stone-800 rounded-lg p-0.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const cur = slotPhoto.cropSettings || { mode: 'custom', scale: 1, offsetX: 0, offsetY: 0 };
+                        const nextScale = Math.max(0.3, Math.round(((cur.scale ?? 1) - 0.1) * 100) / 100);
+                        onUpdatePhotoCrop(slotPhoto.id, { ...cur, mode: 'custom', scale: nextScale }, true);
+                      }}
+                      className="p-1 hover:bg-stone-700 rounded transition"
+                      title="Thu nhỏ ảnh"
+                    >
+                      <ZoomOut className="w-3 h-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onUpdatePhotoCrop(slotPhoto.id, { mode: 'fill', scale: 1, offsetX: 0, offsetY: 0 }, true);
+                      }}
+                      className="px-1.5 py-0.5 text-[10px] font-bold hover:bg-stone-700 rounded transition min-w-[38px] text-center"
+                      title="Đặt lại vị trí & kích thước 100%"
+                    >
+                      {Math.round(((slotPhoto.cropSettings?.scale ?? 1)) * 100)}%
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const cur = slotPhoto.cropSettings || { mode: 'custom', scale: 1, offsetX: 0, offsetY: 0 };
+                        const nextScale = Math.min(4.0, Math.round(((cur.scale ?? 1) + 0.1) * 100) / 100);
+                        onUpdatePhotoCrop(slotPhoto.id, { ...cur, mode: 'custom', scale: nextScale }, true);
+                      }}
+                      className="p-1 hover:bg-stone-700 rounded transition"
+                      title="Phóng to ảnh"
+                    >
+                      <ZoomIn className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setInlineCropSlotId(null)}
+                    className="flex items-center gap-1 px-2.5 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition text-[11px] font-bold"
+                  >
+                    <Check className="w-3 h-3" />
+                    <span>Xong</span>
+                  </button>
+                </>
+              ) : onUpdatePhotoCrop ? (
+                <button
+                  onClick={() => setInlineCropSlotId(selectedSlotId)}
+                  className="flex items-center gap-1 px-2 py-0.5 bg-orange-500 hover:bg-orange-400 text-white rounded-lg transition text-[11px] font-semibold"
+                  title="Kéo & phóng to thu nhỏ ảnh trực tiếp trên khung"
+                >
+                  <Crop className="w-3 h-3" />
+                  <span>Căn trong khung</span>
+                </button>
+              ) : onAdjustCropInSlot ? (
                 <button
                   onClick={() => onAdjustCropInSlot(selectedSlotId)}
                   className="flex items-center gap-1 px-2 py-0.5 bg-brand-600 hover:bg-brand-500 rounded-lg transition text-[11px] font-semibold"
@@ -600,11 +850,19 @@ export const InteractiveCanvas = forwardRef<InteractiveCanvasHandle, Interactive
                 layoutConfig={layoutConfig}
                 photosMap={photosMap}
                 selectedSlotId={selectedSlotId}
+                inlineCropSlotId={inlineCropSlotId}
                 hoveredSlotId={hoveredSlotId}
                 dragOverSlotId={dragOverSlotId}
                 onSelectPage={onSelectPageIndex}
                 onSelectSlot={onSelectSlot}
-                onDoubleClickSlot={onAdjustCropInSlot}
+                onDoubleClickSlot={(slotId) => {
+                  if (onUpdatePhotoCrop) {
+                    setInlineCropSlotId(prev => (prev === slotId ? null : slotId));
+                  } else {
+                    onAdjustCropInSlot?.(slotId);
+                  }
+                }}
+                onUpdatePhotoCrop={onUpdatePhotoCrop}
                 onHoverSlot={setHoveredSlotId}
                 onDragOverSlot={setDragOverSlotId}
                 onDropPhoto={onDropPhotoOnSlot}
