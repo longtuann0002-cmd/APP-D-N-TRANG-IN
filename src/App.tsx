@@ -363,6 +363,12 @@ export function App() {
     return () => window.removeEventListener('focus', handleFocus);
   }, [currentUser?.id, currentUser?.isCloud, supabaseConnected, syncCloudData]);
 
+  // Also sync (throttled 8s) when switching between main tabs (Orders, Templates, Customers, Pricing)
+  useEffect(() => {
+    if (!currentUser?.isCloud || !supabaseConnected) return;
+    syncCloudData(false);
+  }, [activeTab, currentUser?.isCloud, supabaseConnected, syncCloudData]);
+
   // Map of loaded photos for fast canvas lookup
   const photosMap = useMemo(() => {
     const map = new Map<string, PhotoItem>();

@@ -373,7 +373,7 @@ export const storageManager = {
               }
               break;
             case 'customers':
-              if (Array.isArray(row.data_value) && row.data_value.length > 0) {
+              if (Array.isArray(row.data_value)) {
                 localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(row.data_value));
                 customersCount = row.data_value.length;
               }
